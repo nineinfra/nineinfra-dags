@@ -20,7 +20,7 @@ def generate_seatunneljob_name(index):
     return prefix + suffix
 
 
-def create_dynamic_dag(name_space, name, yaml_file_name):
+def create_dynamic_dag(name_space, name, index, yaml_file_name):
     dag_args = {'owner': 'airflow',
                 'start_date': datetime.now(),
                 'end_date': datetime.now() + timedelta(days=1),
@@ -30,7 +30,7 @@ def create_dynamic_dag(name_space, name, yaml_file_name):
                 'email_on_retry': False,
                 'retries': 5,
                 'retry_delay': timedelta(minutes=5)}
-    with DAG(dag_id=f'{dag_prefix}{source}2{sink}',
+    with DAG(dag_id=f'{dag_prefix}{source}2{sink}-{index}',
              default_args=dag_args,
              description='Dynamically create and monitor seatunneljobs in Kubernetes from YAML files',
              schedule=timedelta(days=1),
@@ -80,4 +80,4 @@ for yaml_file in yaml_files:
     task_index += 1
     job_name = generate_seatunneljob_name(task_index)
     yaml_file_path = os.path.join(yaml_files_dir, yaml_file)
-    globals()[job_name] = create_dynamic_dag(name_space=namespace, name=job_name, yaml_file_name=yaml_file_path)
+    globals()[job_name] = create_dynamic_dag(name_space=namespace, name=job_name, index=task_index,yaml_file_name=yaml_file_path)
