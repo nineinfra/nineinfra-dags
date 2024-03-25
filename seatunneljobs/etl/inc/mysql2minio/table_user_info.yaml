@@ -26,15 +26,15 @@ spec:
         "password": "nineinfra"
         "connection_check_timeout_sec": "30"
       tableList:
-        - "table_path": "\"nineinfra.base_category2\""
-          "query": "\"select * from nineinfra.base_category2\""
+        - "table_path": "\"nineinfra.user_info\""
+          "query": "\"select * from nineinfra.user_info WHERE DATE(create_time) = CURDATE() OR DATE(operate_time) = CURDATE()\""
     sink:
       type: S3File
       conf:
           "bucket": "\"s3a://nineinfra/datahouse\""
-          "path": "\"/seatunnel/${table_name}\""
+          "path": "\"/seatunnel/mysql/inc/${table_name}\""
           "tmp_path": "/tmp/seatunnel"
-          "fs.s3a.endpoint": "\"http://10.104.240.226\""
+          "fs.s3a.endpoint": "\"http://minio\""
           "fs.s3a.aws.credentials.provider": "\"org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider\""
           "access_key": "0L3XDNU2JP5EQ203HTO5"
           "secret_key": "WPncfKEg17yUjXLvVBPYZALzcoeGf1KRWWzRgdOe"

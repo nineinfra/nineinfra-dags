@@ -10,7 +10,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__)))
 import seatunneljob
 
 job_type = "etl"
-etl_type = "full"  # full, inc
+etl_type = "inc"  # full, inc
 source = "mysql"
 sink = "minio"
 dag_prefix = f'nineinfra-{job_type}-{etl_type}-'
