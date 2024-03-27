@@ -4,6 +4,7 @@ import airflow
 from datetime import datetime
 from datetime import timedelta
 from airflow import DAG
+from airflow.models import Variable
 from airflow.operators.python import PythonOperator
 from airflow.utils.dates import days_ago
 from airflow.providers.apache.hive.operators.hive import HiveOperator
@@ -40,10 +41,10 @@ create_table = HiveOperator(hql="sqls/create-ods-tables.sql",
                             dag=dag_ods_full)
 generate_sql = PythonOperator(task_id="generate_sql_task",
                               python_callable=generate_etl2ods_full_sql,
-                              op_kwargs={'start_date': airflow.utils.dates.days_ago(1).date()},
+                              op_kwargs={'datahouse_dir': Variable.get("datahouse_dir"), 'start_date': airflow.utils.dates.days_ago(1).date()},
                               provide_context=True,
                               dag=dag_ods_full)
-load_data = HiveOperator(hql="sqls/etl2ods_full.sql",
+load_data = HiveOperator(hql=f'sqls/etl2ods_{ods_type}.sql',
                          task_id="load_data_task",
                          hive_cli_conn_id="hive_conn",
                          dag=dag_ods_full)
