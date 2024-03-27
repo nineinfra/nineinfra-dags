@@ -27,14 +27,14 @@ spec:
         "connection_check_timeout_sec": "30"
       tableList:
         - "table_path": "\"nineinfra.order_refund_info\""
-          "query": "\"select * from nineinfra.order_refund_info WHERE DATE(create_time) = CURDATE()\""
+          "query": "\"select * from nineinfra.order_refund_info WHERE DATE(create_time) = DATE_SUB(CURDATE(), INTERVAL 1 DAY)\""
     sink:
       type: S3File
       conf:
-          "bucket": "\"s3a://nineinfra/datahouse\""
-          "path": "\"/seatunnel/mysql/inc/${table_name}\""
+          "bucket": "\"s3a://nineinfra\""
+          "path": "\"/datahouse/seatunnel/mysql/inc/${table_name}\""
           "tmp_path": "/tmp/seatunnel"
-          "fs.s3a.endpoint": "\"http://minio\""
+          "fs.s3a.endpoint": "\"http://10.104.240.226\""
           "fs.s3a.aws.credentials.provider": "\"org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider\""
           "access_key": "0L3XDNU2JP5EQ203HTO5"
           "secret_key": "WPncfKEg17yUjXLvVBPYZALzcoeGf1KRWWzRgdOe"

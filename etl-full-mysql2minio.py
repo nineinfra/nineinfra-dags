@@ -44,6 +44,7 @@ def create_dynamic_dag(name_space, name, index, yaml_file_name):
                 python_callable=seatunneljob.create_seatunneljob,
                 op_kwargs={'namespace': ns, 'name': n, 'yaml_file': y},
                 provide_context=True,
+                trigger_rule='all_done',
                 dag=dag,
             )
 
@@ -53,6 +54,7 @@ def create_dynamic_dag(name_space, name, index, yaml_file_name):
                 python_callable=seatunneljob.monitor_seatunneljob,
                 op_kwargs={'namespace': ns, 'name': n},
                 provide_context=True,
+                trigger_rule='all_done',
                 dag=dag,
             )
 
@@ -62,6 +64,7 @@ def create_dynamic_dag(name_space, name, index, yaml_file_name):
                 python_callable=seatunneljob.delete_seatunneljob,
                 op_kwargs={'namespace': ns, 'name': n},
                 provide_context=True,
+                trigger_rule='all_done',
                 dag=dag,
             )
 
