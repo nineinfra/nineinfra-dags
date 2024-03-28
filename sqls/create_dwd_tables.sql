@@ -14,7 +14,6 @@ create table if not exists dwd_trade_cart_add_inc
     sku_num          bigint comment '加购物车件数'
 ) comment '交易域加购物车事务事实表' 
     partitioned by (`dt` string)
-    row format delimited fields terminated by '\t' 
     stored as orc
     tblproperties ('orc.compress' = 'snappy');
 
@@ -40,8 +39,7 @@ create table if not exists dwd_trade_order_detail_inc
     split_coupon_amount   decimal(16, 2) comment '优惠券优惠分摊',
     split_total_amount    decimal(16, 2) comment '最终价格分摊'
 ) comment '交易域下单明细事务事实表' 
-    partitioned by (dt string) 
-    row format delimited fields terminated by '\t' 
+    partitioned by (dt string)
     stored as orc
     tblproperties ('orc.compress' = 'snappy');
 
@@ -67,8 +65,7 @@ create table if not exists dwd_trade_cancel_detail_inc
     split_coupon_amount   decimal(16, 2) comment '优惠券优惠分摊',
     split_total_amount    decimal(16, 2) comment '最终价格分摊'
 ) comment '交易域取消订单明细事务事实表' 
-    partitioned by (dt string) 
-    row format delimited fields terminated by '\t' 
+    partitioned by (dt string)
     stored as orc
     tblproperties ('orc.compress' = 'snappy');
 
@@ -96,8 +93,7 @@ create table if not exists dwd_trade_pay_detail_suc_inc
     split_coupon_amount   decimal(16, 2) comment '支付优惠券优惠分摊',
     split_payment_amount  decimal(16, 2) comment '支付金额'
 ) comment '交易域成功支付事务事实表' 
-    partitioned by (dt string) 
-    row format delimited fields terminated by '\t' 
+    partitioned by (dt string)
     stored as orc
     tblproperties ('orc.compress' = 'snappy');
 
@@ -154,8 +150,7 @@ create table if not exists dwd_trade_cart_full
     sku_name string comment '商品名称',
     sku_num  bigint comment '购物车件数'
 ) comment '交易域购物车周期快照事实表' 
-    partitioned by (dt string) 
-    row format delimited fields terminated by '\t' 
+    partitioned by (dt string)
     stored as orc
     tblproperties ('orc.compress' = 'snappy');
 

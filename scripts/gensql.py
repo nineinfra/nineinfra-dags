@@ -28,17 +28,6 @@ INC_LOAD_TABLES = ["cart_info", "comment_info", "ods_coupon_use", "ods_favor_inf
                    "order_info", "order_refund_info", "ods_order_status_log",
                    "payment_info", "refund_payment", "user_info"]
 
-DWD_INIT_SQLS = [ods2dwdinit.dwd_trade_cart_add_inc, ods2dwdinit.dwd_trade_order_detail_inc,
-                 ods2dwdinit.dwd_trade_cancel_detail_inc, ods2dwdinit.dwd_trade_pay_detail_suc_inc,
-                 ods2dwdinit.dwd_trade_order_refund_inc, ods2dwdinit.dwd_trade_refund_pay_suc_inc,
-                 ods2dwdinit.dwd_trade_cart_full, ods2dwdinit.dwd_tool_coupon_get_inc,
-                 ods2dwdinit.dwd_tool_coupon_order_inc, ods2dwdinit.dwd_tool_coupon_pay_inc,
-                 ods2dwdinit.dwd_interaction_favor_add_inc, ods2dwdinit.dwd_interaction_comment_inc,
-                 ods2dwdinit.dwd_traffic_page_view_inc, ods2dwdinit.dwd_traffic_start_inc,
-                 ods2dwdinit.dwd_traffic_action_inc, ods2dwdinit.dwd_traffic_display_inc,
-                 ods2dwdinit.dwd_traffic_error_inc, ods2dwdinit.dwd_user_register_inc, ods2dwdinit.dwd_user_login_inc]
-
-
 DIM_SQLS = [ods2dim.dim_user_zip, ods2dim.dim_sku_full, ods2dim.dim_province_full,
             ods2dim.dim_coupon_full, ods2dim.dim_activity_full]
 
@@ -114,19 +103,19 @@ def generate_etl2ods_inc_sql(datahouse_dir, start_date):
 
 # 生成初始化事实表的sql
 def generate_ods2dwd_init_sql(start_date):
-    ods2dwdinit.start_date = start_date
-    SQL_FILE_DATA = ""
-    for sql in DWD_INIT_SQLS:
-        SQL_FILE_DATA += sql
+    dwd_init_sqls = ods2dwdinit.get_ods2dim_init_sqls(DATA_BASE, start_date)
+    sql_file_data = ""
+    for sql in dwd_init_sqls:
+        sql_file_data += sql
 
     # 将 SQL_FILE_DATA 写入文件
     with open(f"{SQL_FILE_DIR}/ods2dwd_init.sql", 'w') as f:
-        f.write(SQL_FILE_DATA)
+        f.write(sql_file_data)
 
 
 # 生成初始化维度表的sql
 def generate_ods2dim_init_sql(datahouse_dir, start_date):
-    dim_init_sqls = ods2diminit.get_ods2dim_init_sqls(datahouse_dir,DATA_BASE,start_date)
+    dim_init_sqls = ods2diminit.get_ods2dim_init_sqls(datahouse_dir, DATA_BASE, start_date)
     sql_file_data = ""
     for sql in dim_init_sqls:
         sql_file_data += sql
