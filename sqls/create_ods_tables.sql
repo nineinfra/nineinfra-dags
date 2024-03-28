@@ -6,8 +6,7 @@ use datahouse;
 -- -------------------------------------------------------------------------------------------------
 -- 日志表
 -- -------------------------------------------------------------------------------------------------
---drop table if exists ods_log_inc;
---create external table  if not exists ods_log_inc
+drop table if exists ods_log_inc;
 create table  if not exists ods_log_inc
 (
 	common   struct<ar: string, ba: string, ch: string, is_new: string, md: string, mid: string, os: string, uid: string, vc: string> comment '公共信息',
@@ -30,7 +29,7 @@ create table  if not exists ods_log_inc
 -- -------------------------------------------------------------------------------------------------
 -- 活动信息表（全量表）
 -- -------------------------------------------------------------------------------------------------
---drop table if exists ods_activity_info_full;
+drop table if exists ods_activity_info_full;
 --create external table  if not exists ods_activity_info_full
 create table  if not exists ods_activity_info_full
 (
@@ -50,7 +49,7 @@ create table  if not exists ods_activity_info_full
 -- -------------------------------------------------------------------------------------------------
 -- 活动规则表（全量表）
 -- -------------------------------------------------------------------------------------------------
---drop table if exists ods_activity_rule_full;
+drop table if exists ods_activity_rule_full;
 --create external table  if not exists ods_activity_rule_full
 create table  if not exists ods_activity_rule_full
 (
@@ -71,7 +70,7 @@ create table  if not exists ods_activity_rule_full
 -- -------------------------------------------------------------------------------------------------
 -- 一级品类表（全量表）
 -- -------------------------------------------------------------------------------------------------
---drop table if exists ods_base_category1_full;
+drop table if exists ods_base_category1_full;
 --create external table  if not exists ods_base_category1_full
 create table  if not exists ods_base_category1_full
 (
@@ -86,7 +85,7 @@ create table  if not exists ods_base_category1_full
 -- -------------------------------------------------------------------------------------------------
 -- 二级品类表（全量表）
 -- -------------------------------------------------------------------------------------------------
---drop table if exists ods_base_category2_full;
+drop table if exists ods_base_category2_full;
 --create external table  if not exists ods_base_category2_full
 create table  if not exists ods_base_category2_full
 (
@@ -102,7 +101,7 @@ create table  if not exists ods_base_category2_full
 -- -------------------------------------------------------------------------------------------------
 -- 三级品类表（全量表）
 -- -------------------------------------------------------------------------------------------------
---drop table if exists ods_base_category3_full;
+drop table if exists ods_base_category3_full;
 --create external table  if not exists ods_base_category3_full
 create table  if not exists ods_base_category3_full
 (
@@ -118,7 +117,7 @@ create table  if not exists ods_base_category3_full
 -- -------------------------------------------------------------------------------------------------
 -- 编码字典表（全量表）
 -- -------------------------------------------------------------------------------------------------
---drop table if exists ods_base_dic_full;
+drop table if exists ods_base_dic_full;
 --create external table  if not exists ods_base_dic_full
 create table  if not exists ods_base_dic_full
 (
@@ -137,7 +136,7 @@ create table  if not exists ods_base_dic_full
 -- -------------------------------------------------------------------------------------------------
 -- 省份表（全量表）
 -- -------------------------------------------------------------------------------------------------
---drop table if exists ods_base_province_full;
+drop table if exists ods_base_province_full;
 --create external table  if not exists ods_base_province_full
 create table  if not exists ods_base_province_full
 (
@@ -156,7 +155,7 @@ create table  if not exists ods_base_province_full
 -- -------------------------------------------------------------------------------------------------
 -- 地区表（全量表）
 -- -------------------------------------------------------------------------------------------------
---drop table if exists ods_base_region_full;
+drop table if exists ods_base_region_full;
 --create external table  if not exists ods_base_region_full
 create table  if not exists ods_base_region_full
 (
@@ -171,7 +170,7 @@ create table  if not exists ods_base_region_full
 -- -------------------------------------------------------------------------------------------------
 -- 品牌表（全量表）
 -- -------------------------------------------------------------------------------------------------
---drop table if exists ods_base_trademark_full;
+drop table if exists ods_base_trademark_full;
 --create external table  if not exists ods_base_trademark_full
 create table  if not exists ods_base_trademark_full
 (
@@ -187,7 +186,7 @@ create table  if not exists ods_base_trademark_full
 -- -------------------------------------------------------------------------------------------------
 -- 购物车表（全量表）
 -- -------------------------------------------------------------------------------------------------
---drop table if exists ods_cart_info_full;
+drop table if exists ods_cart_info_full;
 --create external table  if not exists ods_cart_info_full
 create table  if not exists ods_cart_info_full
 (
@@ -214,7 +213,7 @@ create table  if not exists ods_cart_info_full
 -- -------------------------------------------------------------------------------------------------
 -- 优惠券信息表（全量表）
 -- -------------------------------------------------------------------------------------------------
---drop table if exists ods_coupon_info_full;
+drop table if exists ods_coupon_info_full;
 --create external table  if not exists ods_coupon_info_full
 create table  if not exists ods_coupon_info_full
 (
@@ -243,7 +242,7 @@ create table  if not exists ods_coupon_info_full
 -- -------------------------------------------------------------------------------------------------
 -- 商品平台属性表（全量表）
 -- -------------------------------------------------------------------------------------------------
---drop table if exists ods_sku_attr_value_full;
+drop table if exists ods_sku_attr_value_full;
 --create external table  if not exists ods_sku_attr_value_full
 create table  if not exists ods_sku_attr_value_full
 (
@@ -262,7 +261,7 @@ create table  if not exists ods_sku_attr_value_full
 -- -------------------------------------------------------------------------------------------------
 -- 商品表（全量表）
 -- -------------------------------------------------------------------------------------------------
---drop table if exists ods_sku_info_full;
+drop table if exists ods_sku_info_full;
 --create external table  if not exists ods_sku_info_full
 create table  if not exists ods_sku_info_full
 (
@@ -286,7 +285,7 @@ create table  if not exists ods_sku_info_full
 -- -------------------------------------------------------------------------------------------------
 -- 商品销售属性值表（全量表）
 -- -------------------------------------------------------------------------------------------------
---drop table if exists ods_sku_sale_attr_value_full;
+drop table if exists ods_sku_sale_attr_value_full;
 --create external table  if not exists ods_sku_sale_attr_value_full
 create table  if not exists ods_sku_sale_attr_value_full
 (
@@ -306,7 +305,7 @@ create table  if not exists ods_sku_sale_attr_value_full
 -- -------------------------------------------------------------------------------------------------
 --  SPU 表（全量表）
 -- -------------------------------------------------------------------------------------------------
---drop table if exists ods_spu_info_full;
+drop table if exists ods_spu_info_full;
 --create external table  if not exists ods_spu_info_full
 create table  if not exists ods_spu_info_full
 (
@@ -324,7 +323,7 @@ create table  if not exists ods_spu_info_full
 -- -------------------------------------------------------------------------------------------------
 -- 购物车表（增量表）
 -- -------------------------------------------------------------------------------------------------
---drop table if exists ods_cart_info_inc;
+drop table if exists ods_cart_info_inc;
 --create external table  if not exists ods_cart_info_inc
 create table  if not exists ods_cart_info_inc
 (
@@ -344,7 +343,7 @@ create table  if not exists ods_cart_info_inc
 -- -------------------------------------------------------------------------------------------------
 -- 评论表（增量表）
 -- -------------------------------------------------------------------------------------------------
---drop table if exists ods_comment_info_inc;
+drop table if exists ods_comment_info_inc;
 --create external table  if not exists ods_comment_info_inc
 create table  if not exists ods_comment_info_inc
 (
@@ -363,7 +362,7 @@ create table  if not exists ods_comment_info_inc
 -- -------------------------------------------------------------------------------------------------
 -- 优惠券领用表（增量表）
 -- -------------------------------------------------------------------------------------------------
---drop table if exists ods_coupon_use_inc;
+drop table if exists ods_coupon_use_inc;
 --create external table  if not exists ods_coupon_use_inc
 create table  if not exists ods_coupon_use_inc
 (
@@ -382,7 +381,7 @@ create table  if not exists ods_coupon_use_inc
 -- -------------------------------------------------------------------------------------------------
 -- 收藏表（增量表）
 -- -------------------------------------------------------------------------------------------------
---drop table if exists ods_favor_info_inc;
+drop table if exists ods_favor_info_inc;
 --create external table  if not exists ods_favor_info_inc
 create table  if not exists ods_favor_info_inc
 (
@@ -400,7 +399,7 @@ create table  if not exists ods_favor_info_inc
 -- -------------------------------------------------------------------------------------------------
 -- 订单明细表（增量表）
 -- -------------------------------------------------------------------------------------------------
---drop table if exists ods_order_detail_inc;
+drop table if exists ods_order_detail_inc;
 --create external table  if not exists ods_order_detail_inc
 create table  if not exists ods_order_detail_inc
 (
@@ -421,7 +420,7 @@ create table  if not exists ods_order_detail_inc
 -- -------------------------------------------------------------------------------------------------
 -- 订单明细活动关联表（增量表）
 -- -------------------------------------------------------------------------------------------------
---drop table if exists ods_order_detail_activity_inc;
+drop table if exists ods_order_detail_activity_inc;
 --create external table  if not exists ods_order_detail_activity_inc
 create table  if not exists ods_order_detail_activity_inc
 (
@@ -439,7 +438,7 @@ create table  if not exists ods_order_detail_activity_inc
 -- -------------------------------------------------------------------------------------------------
 -- 订单明细优惠券关联表（增量表）
 -- -------------------------------------------------------------------------------------------------
---drop table if exists ods_order_detail_coupon_inc;
+drop table if exists ods_order_detail_coupon_inc;
 --create external table  if not exists ods_order_detail_coupon_inc
 create table  if not exists ods_order_detail_coupon_inc
 (
@@ -457,7 +456,7 @@ create table  if not exists ods_order_detail_coupon_inc
 -- -------------------------------------------------------------------------------------------------
 -- 订单表（增量表）
 -- -------------------------------------------------------------------------------------------------
---drop table if exists ods_order_info_inc;
+drop table if exists ods_order_info_inc;
 --create external table  if not exists ods_order_info_inc
 create table  if not exists ods_order_info_inc
 (
@@ -482,7 +481,7 @@ create table  if not exists ods_order_info_inc
 -- -------------------------------------------------------------------------------------------------
 -- 退单表（增量表）
 -- -------------------------------------------------------------------------------------------------
---drop table if exists ods_order_refund_info_inc;
+drop table if exists ods_order_refund_info_inc;
 --create external table  if not exists ods_order_refund_info_inc
 create table  if not exists ods_order_refund_info_inc
 (
@@ -502,7 +501,7 @@ create table  if not exists ods_order_refund_info_inc
 -- -------------------------------------------------------------------------------------------------
 -- 订单状态流水表（增量表）
 -- -------------------------------------------------------------------------------------------------
---drop table if exists ods_order_status_log_inc;
+drop table if exists ods_order_status_log_inc;
 --create external table  if not exists ods_order_status_log_inc
 create table  if not exists ods_order_status_log_inc
 (
@@ -519,7 +518,7 @@ create table  if not exists ods_order_status_log_inc
 -- -------------------------------------------------------------------------------------------------
 -- 支付表（增量表）
 -- -------------------------------------------------------------------------------------------------
---drop table if exists ods_payment_info_inc;
+drop table if exists ods_payment_info_inc;
 --create external table  if not exists ods_payment_info_inc
 create table  if not exists ods_payment_info_inc
 (
@@ -539,7 +538,7 @@ create table  if not exists ods_payment_info_inc
 -- -------------------------------------------------------------------------------------------------
 -- 退款表（增量表）
 -- -------------------------------------------------------------------------------------------------
---drop table if exists ods_refund_payment_inc;
+drop table if exists ods_refund_payment_inc;
 --create external table  if not exists ods_refund_payment_inc
 create table  if not exists ods_refund_payment_inc
 (
@@ -559,7 +558,7 @@ create table  if not exists ods_refund_payment_inc
 -- -------------------------------------------------------------------------------------------------
 -- 用户表（增量表）
 -- -------------------------------------------------------------------------------------------------
---drop table if exists ods_user_info_inc;
+drop table if exists ods_user_info_inc;
 --create external table  if not exists ods_user_info_inc
 create table  if not exists ods_user_info_inc
 (

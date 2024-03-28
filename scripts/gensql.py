@@ -200,6 +200,7 @@ def generate_dws2ads_sql(start_date):
 
 if __name__ == '__main__':
     MINIO_DATAHOUSE_DIR = "s3a://nineinfra/datahouse"
+    generate_create_dim_tables_sql(MINIO_DATAHOUSE_DIR, datetime.date(2024, 3, 25))
     generate_etl2ods_full_sql(MINIO_DATAHOUSE_DIR, datetime.date(2024, 3, 25))
     generate_etl2ods_inc_sql(MINIO_DATAHOUSE_DIR, datetime.date(2024, 3, 25))
     generate_ods2dwd_init_sql(datetime.date(2024, 3, 25))

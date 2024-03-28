@@ -10,43 +10,42 @@ from airflow.utils.dates import days_ago
 from airflow.providers.apache.hive.operators.hive import HiveOperator
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "scripts"))
-from gensql import generate_etl2ods_full_sql
+import gensql
 
 job_type = "ods"
-ods_type = "full"  # full, inc
-db_type = "mysql"
-dag_id_name = f'nineinfra-{job_type}-{ods_type}'
+sync_type = "full"  # full, inc
+dag_id_name = f'nineinfra-{job_type}-{sync_type}'
 
+dag_args = {'owner': 'airflow',
+            'start_date': airflow.utils.dates.days_ago(1),
+            'end_date': datetime.now(),
+            'depends_on_past': False,
+            'email': ['ninebigbig@gmail.com'],
+            'email_on_failure': False,
+            'email_on_retry': False,
+            'retries': 5,
+            'retry_delay': timedelta(minutes=5)}
 
-ods_full_args = {'owner': 'airflow',
-                 'start_date': airflow.utils.dates.days_ago(1),
-                 'end_date': datetime.now(),
-                 'depends_on_past': False,
-                 'email': ['ninebigbig@gmail.com'],
-                 'email_on_failure': False,
-                 'email_on_retry': False,
-                 'retries': 5,
-                 'retry_delay': timedelta(minutes=5)}
-
-dag_ods_full = DAG(dag_id=f'{dag_id_name}',
-                   default_args=ods_full_args,
+dag_instance = DAG(dag_id=f'{dag_id_name}',
+                   default_args=dag_args,
                    schedule_interval='@once',
                    start_date=days_ago(1),
                    dagrun_timeout=timedelta(minutes=60),
-                   description='executing the sql and hql scripts for the ods full', )
+                   description=f'executing the sql and hql scripts for the {job_type} {sync_type}', )
 
-create_table = HiveOperator(hql="sqls/create-ods-tables.sql",
-                            task_id="create_ods_tables_task",
+create_table = HiveOperator(hql=f"sqls/create_{job_type}_tables.sql",
+                            task_id=f"create_{job_type}_tables_task",
                             hive_cli_conn_id="hive_conn",
-                            dag=dag_ods_full)
+                            dag=dag_instance)
 generate_sql = PythonOperator(task_id="generate_sql_task",
-                              python_callable=generate_etl2ods_full_sql,
-                              op_kwargs={'datahouse_dir': Variable.get("datahouse_dir"), 'start_date': airflow.utils.dates.days_ago(1).date()},
+                              python_callable=gensql.generate_etl2ods_full_sql,
+                              op_kwargs={'datahouse_dir': Variable.get("datahouse_dir"),
+                                         'start_date': airflow.utils.dates.days_ago(1).date()},
                               provide_context=True,
-                              dag=dag_ods_full)
-load_data = HiveOperator(hql=f'sqls/etl2ods_{ods_type}.sql',
+                              dag=dag_instance)
+load_data = HiveOperator(hql=f'sqls/etl2ods_{sync_type}.sql',
                          task_id="load_data_task",
                          hive_cli_conn_id="hive_conn",
-                         dag=dag_ods_full)
+                         dag=dag_instance)
 
 create_table >> generate_sql >> load_data
