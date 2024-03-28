@@ -38,8 +38,6 @@ DWD_INIT_SQLS = [ods2dwdinit.dwd_trade_cart_add_inc, ods2dwdinit.dwd_trade_order
                  ods2dwdinit.dwd_traffic_action_inc, ods2dwdinit.dwd_traffic_display_inc,
                  ods2dwdinit.dwd_traffic_error_inc, ods2dwdinit.dwd_user_register_inc, ods2dwdinit.dwd_user_login_inc]
 
-DIM_INIT_SQLS = [ods2diminit.dim_date, ods2diminit.dim_user_zip, ods2diminit.dim_sku_full,
-                 ods2diminit.dim_province_full, ods2diminit.dim_coupon_full, ods2diminit.dim_activity_full]
 
 DIM_SQLS = [ods2dim.dim_user_zip, ods2dim.dim_sku_full, ods2dim.dim_province_full,
             ods2dim.dim_coupon_full, ods2dim.dim_activity_full]
@@ -127,16 +125,15 @@ def generate_ods2dwd_init_sql(start_date):
 
 
 # 生成初始化维度表的sql
-def generate_ods2dim_init_sql(datahouse_dir,start_date):
-    ods2diminit.datahouse_dir = datahouse_dir
-    ods2diminit.start_date = start_date
-    SQL_FILE_DATA = ""
-    for sql in DIM_INIT_SQLS:
-        SQL_FILE_DATA += sql
+def generate_ods2dim_init_sql(datahouse_dir, start_date):
+    dim_init_sqls = ods2diminit.get_ods2dim_init_sqls(datahouse_dir,DATA_BASE,start_date)
+    sql_file_data = ""
+    for sql in dim_init_sqls:
+        sql_file_data += sql
 
     # 将 SQL_FILE_DATA 写入文件
     with open(f"{SQL_FILE_DIR}/ods2dim_init.sql", 'w') as f:
-        f.write(SQL_FILE_DATA)
+        f.write(sql_file_data)
 
 
 # 生成维度表的sql

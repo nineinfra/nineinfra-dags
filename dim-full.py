@@ -29,7 +29,7 @@ dag_args = {'owner': 'airflow',
 dag_instance = DAG(dag_id=f'{dag_id_name}',
                    default_args=dag_args,
                    schedule_interval='@once',
-                   start_date=days_ago(1),
+                   start_date=days_ago(0),
                    dagrun_timeout=timedelta(minutes=60),
                    description=f'executing the sql and hql scripts for the {job_type} {sync_type}', )
 
