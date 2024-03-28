@@ -3,11 +3,12 @@ import sys
 
 sys.path.append(os.path.join(os.path.dirname(__file__)))
 
+datahouse_dir = "s3a://nineinfra/datahouse"
 DATA_BASE = "datahouse"
 start_date = "2024-03-27"
 
 dim_date = f"\
-    load data local inpath 'date_info.tsv' overwrite into table {DATA_BASE}.tmp_dim_date_info;\n\
+    load data inpath '{datahouse_dir}/common/date_info.tsv' overwrite into table {DATA_BASE}.tmp_dim_date_info;\n\
     insert overwrite table {DATA_BASE}.dim_date select * from {DATA_BASE}.tmp_dim_date_info;"
 
 dim_user_zip = f"\n\
@@ -37,7 +38,9 @@ dim_sku_full = f"\n\
                sku_name,\n\
                sku_desc,\n\
                weight,\n\
-               is_sale,\n\
+               CASE WHEN is_sale = '1' THEN true\n\
+                    WHEN is_sale = '0' THEN false\n\
+               END AS is_sale,\n\
                spu_id,\n\
                category3_id,\n\
                tm_id,\n\

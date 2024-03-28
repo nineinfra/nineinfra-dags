@@ -1,3 +1,5 @@
+use datahouse;
+
 drop table if exists dwd_trade_cart_add_inc;
 create table if not exists dwd_trade_cart_add_inc
 (

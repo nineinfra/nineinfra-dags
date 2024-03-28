@@ -1,9 +1,9 @@
 -- -------------------------------------------------------------------------------------------------
 -- 初始化数据库
 -- 
--- drop database if exists at_gui_gu;
--- create database if not exists at_gui_gu;
--- use at_gui_gu;
+ drop database if exists datahouse;
+ create database if not exists datahouse;
+ use datahouse;
 -- show tables;
 -- -------------------------------------------------------------------------------------------------
 

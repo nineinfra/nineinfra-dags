@@ -1,3 +1,5 @@
+use datahouse;
+
 -- -------------------------------------------------------------------------------------------------
 -- DWS 层建表语句
 -- -------------------------------------------------------------------------------------------------
@@ -269,7 +271,7 @@ create table if not exists dws_trade_user_payment_nd
 
 -- 交易域用户粒度退单最近 N 日汇总表
 drop table if exists dws_trade_user_order_refund_nd;
-create external table if not exists dws_trade_user_order_refund_nd
+create table if not exists dws_trade_user_order_refund_nd
 (
     user_id                 string         comment '用户 ID',
     order_refund_count_7d   bigint         comment '最近 7 日退单次数',

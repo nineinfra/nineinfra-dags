@@ -1,3 +1,5 @@
+use datahouse;
+
 -- -------------------------------------------------------------------------------------------------
 -- DIM 层建表语句
 -- -------------------------------------------------------------------------------------------------
@@ -101,7 +103,7 @@ create table  if not exists dim_province_full
 
 -- 日期维度表
 drop table if exists dim_date;
-create external table  if not exists dim_date
+create table  if not exists dim_date
 (
     date_id    string comment '日期 ID',
     week_id    string comment '周 ID,一年中的第几周',
@@ -137,3 +139,21 @@ create table  if not exists dim_user_zip
     partitioned by (dt string)
     stored as orc
     tblproperties ('orc.compress' = 'snappy');
+
+-- -------------------------------------------------------------------------------------------------
+-- TMP 层建表语句
+-- -------------------------------------------------------------------------------------------------
+-- 日期维度表
+drop table if exists tmp_dim_date_info;
+create table  if not exists tmp_dim_date_info
+(
+    date_id    string comment '日',
+    week_id    string comment '周 ID',
+    week_day   string comment '周几',
+    day        string comment '每月的第几天',
+    month      string comment '第几月',
+    quarter    string comment '第几季度',
+    year       string comment '年',
+    is_workday string comment '是否是工作日',
+    holiday_id string comment '节假日'
+) comment '时间维度表' row format delimited fields terminated by '\t';

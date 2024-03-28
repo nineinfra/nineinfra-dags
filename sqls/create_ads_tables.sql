@@ -1,3 +1,5 @@
+use datahouse;
+
 -- -------------------------------------------------------------------------------------------------
 -- ADS 层建表语句
 -- -------------------------------------------------------------------------------------------------
@@ -205,22 +207,3 @@ create table if not exists ads_activity_stats
     reduce_rate   decimal(16, 2) comment '补贴率'
 ) comment '活动统计'
     row format delimited fields terminated by '\t';
-
-
--- -------------------------------------------------------------------------------------------------
--- TMP 层建表语句
--- -------------------------------------------------------------------------------------------------
--- 日期维度表
-drop table if exists tmp_dim_date_info;
-create table  if not exists tmp_dim_date_info
-(
-    date_id    string comment '日',
-    week_id    string comment '周 ID',
-    week_day   string comment '周几',
-    day        string comment '每月的第几天',
-    month      string comment '第几月',
-    quarter    string comment '第几季度',
-    year       string comment '年',
-    is_workday string comment '是否是工作日',
-    holiday_id string comment '节假日'
-) comment '时间维度表' row format delimited fields terminated by '\t';

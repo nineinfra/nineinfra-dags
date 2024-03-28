@@ -127,7 +127,8 @@ def generate_ods2dwd_init_sql(start_date):
 
 
 # 生成初始化维度表的sql
-def generate_ods2dim_init_sql(start_date):
+def generate_ods2dim_init_sql(datahouse_dir,start_date):
+    ods2diminit.datahouse_dir = datahouse_dir
     ods2diminit.start_date = start_date
     SQL_FILE_DATA = ""
     for sql in DIM_INIT_SQLS:
@@ -200,7 +201,6 @@ def generate_dws2ads_sql(start_date):
 
 if __name__ == '__main__':
     MINIO_DATAHOUSE_DIR = "s3a://nineinfra/datahouse"
-    generate_create_dim_tables_sql(MINIO_DATAHOUSE_DIR, datetime.date(2024, 3, 25))
     generate_etl2ods_full_sql(MINIO_DATAHOUSE_DIR, datetime.date(2024, 3, 25))
     generate_etl2ods_inc_sql(MINIO_DATAHOUSE_DIR, datetime.date(2024, 3, 25))
     generate_ods2dwd_init_sql(datetime.date(2024, 3, 25))

@@ -1,4 +1,4 @@
-DATA_BASE = "datahouse_olap"
+DATA_BASE = "datahouse"
 start_date = "2024-03-27"
 
 ads_traffic_stats_by_channel = f"\n\
