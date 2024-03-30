@@ -470,7 +470,7 @@ create table  if not exists ods_order_info_inc
 	            tracking_no: string,                   parent_order_id: string ,               img_url: string,  
 	            province_id: string,                   activity_reduce_amount: decimal(16, 2), coupon_reduce_amount: decimal(16, 2),
 	            original_total_amount: decimal(16, 2), freight_fee: decimal(16, 2),            freight_fee_reduce: decimal(16, 2),
-	            refundable_time: decimal(16, 2)>                                                                                     comment '数据',
+	            refundable_time: string>                                                                                     comment '数据',
 	old  map<string, string>                                                                                                         comment '旧值'
 ) comment '订单表' 
     partitioned by (dt string) 

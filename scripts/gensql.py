@@ -16,6 +16,7 @@ DATA_BASE = "datahouse"
 ETL_LOG_DIR = "/kafka/nineinfra"
 ETL_DB_FULL_DIR = "/seatunnel/mysql/full"
 ETL_DB_INC_DIR = "/seatunnel/mysql/inc"
+ETL_DB_INC_DIR = "/seatunnel/mysql/daily"
 SQL_FILE_DIR = os.path.join(os.path.dirname(__file__), "../sqls")
 
 FULL_LOAD_TABLES = ["activity_info", "activity_rule", "base_category1",

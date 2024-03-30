@@ -9,16 +9,17 @@ from airflow.operators.python import PythonOperator
 sys.path.append(os.path.join(os.path.dirname(__file__)))
 import seatunneljob
 
+nineinfra_prefix = "nineinfra"
 job_type = "etl"
 etl_type = "inc"  # full, inc
 source = "mysql"
 sink = "minio"
-dag_prefix = f'nineinfra-{job_type}-{etl_type}-'
+dag_prefix = f'{nineinfra_prefix}-{job_type}-{etl_type}-'
 seatunneljobs_subdir = f'seatunneljobs/{job_type}/{etl_type}/{source}2{sink}'
 
 
 def generate_seatunneljob_name(index):
-    prefix = f'nineinfra-seatunneljob-{job_type}-{etl_type}-{source}2{sink}-'
+    prefix = f'{nineinfra_prefix}-{job_type}-{etl_type}-{source}2{sink}-'
     suffix = str(index)
     return prefix + suffix
 

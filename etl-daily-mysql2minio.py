@@ -11,7 +11,7 @@ import seatunneljob
 
 nineinfra_prefix = "nineinfra"
 job_type = "etl"
-etl_type = "full"  # full, inc
+etl_type = "daily"  # full, inc,daily
 source = "mysql"
 sink = "minio"
 dag_prefix = f'{nineinfra_prefix}-{job_type}-{etl_type}-'

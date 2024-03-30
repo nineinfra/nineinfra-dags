@@ -41,7 +41,7 @@ create table  if not exists ods_comment_info_daily
 	appraise     string         comment '评价 1 好评 2 中评 3 差评',
 	comment_txt  string         comment '评价内容',
 	create_time  string         comment '创建时间',
-	operate_time string         comment '修改时间',
+	operate_time string         comment '修改时间'
 ) comment '商品评论日增表'
     partitioned by (dt string)
     row format delimited fields terminated by '\t' null defined as '';
@@ -60,7 +60,7 @@ create table  if not exists ods_coupon_use_daily
 	get_time     string         comment '获取时间',
 	using_time   string         comment '使用时间',
 	used_time    string         comment '支付时间',
-	expire_time  string         comment '过期时间',
+	expire_time  string         comment '过期时间'
 ) comment '优惠券领用日增表'
     partitioned by (dt string)
     row format delimited fields terminated by '\t' null defined as '';
@@ -78,7 +78,7 @@ create table  if not exists ods_favor_info_daily
     spu_id       string         comment '商品 ID',
     is_cancel    string         comment '是否已取消 0 正常 1 已取消',
     create_time  string         comment '创建时间',
-    cancel_time  string         comment '修改时间',
+    cancel_time  string         comment '修改时间'
 ) comment '商品收藏日增表'
     partitioned by (dt string)
     row format delimited fields terminated by '\t' null defined as '';
@@ -102,7 +102,7 @@ create table  if not exists ods_order_detail_daily
 	source_id    string         comment '来源编号',
 	split_total_amount decimal(16,2) comment '总金额',
 	split_activity_amount decimal(16,2) comment '活动金额',
-	split_coupon_amount decimal(16,2) comment '优惠券金额',
+	split_coupon_amount decimal(16,2) comment '优惠券金额'
 ) comment '订单明细日增表'
     partitioned by (dt string)
     row format delimited fields terminated by '\t' null defined as '';
@@ -119,7 +119,7 @@ create table  if not exists ods_order_detail_activity_daily
 	activity_id  string         comment '活动ID',
 	activity_rule_id  string         comment '活动规则',
 	sku_id       string         comment 'sku_id',
-	create_time  string         comment '创建时间',
+	create_time  string         comment '创建时间'
 ) comment '订单明细活动日增表'
     partitioned by (dt string)
     row format delimited fields terminated by '\t' null defined as '';
@@ -136,7 +136,7 @@ create table  if not exists ods_order_detail_coupon_daily
 	coupon_id    string         comment '购物券ID',
 	coupon_use_id string        comment '购物券领用id',
 	sku_id       string         comment 'sku_id',
-	create_time  string         comment '创建时间',
+	create_time  string         comment '创建时间'
 ) comment '订单明细购物券日增表'
     partitioned by (dt string)
     row format delimited fields terminated by '\t' null defined as '';
@@ -171,7 +171,7 @@ create table  if not exists ods_order_info_daily
 	original_total_amount decimal(16,2) comment '原价金额',
 	feight_fee    decimal(16,2) comment '运费',
 	feight_fee_reduce decimal(16,2) comment '运费减免',
-	refundable_time string        comment '可退款日期（签收后30天）',
+	refundable_time string        comment '可退款日期（签收后30天）'
 ) comment '订单日增表'
     partitioned by (dt string)
     row format delimited fields terminated by '\t' null defined as '';
@@ -192,7 +192,7 @@ create table  if not exists ods_order_refund_info_daily
 	refund_reason_type string    comment '原因类型',
 	refund_reason_txt string      comment '原因内容',
 	refund_status string         comment '退款状态（0：待审批 1：已退款）',
-	create_time  string         comment '创建时间',
+	create_time  string         comment '创建时间'
 ) comment '退单日增表'
     partitioned by (dt string)
     row format delimited fields terminated by '\t' null defined as '';
@@ -206,7 +206,7 @@ create table  if not exists ods_order_status_log_daily
 	id           string         comment '编号',
 	order_id     string         comment '订单 ID',
 	order_status string         comment '订单状态',
-	operate_time string         comment '操作时间',
+	operate_time string         comment '操作时间'
 ) comment '订单状态日志记录日增表'
     partitioned by (dt string)
     row format delimited fields terminated by '\t' null defined as '';
@@ -228,7 +228,7 @@ create table  if not exists ods_payment_info_daily
 	payment_status string        comment '支付状态',
 	create_time  string         comment '创建时间',
 	callback_time string         comment '回调时间',
-	callback_content string      comment '回调信息',
+	callback_content string      comment '回调信息'
 ) comment '支付信息日增表'
     partitioned by (dt string)
     row format delimited fields terminated by '\t' null defined as '';
@@ -251,7 +251,7 @@ create table  if not exists ods_refund_payment_daily
 	refund_status string        comment '退款状态',
 	create_time  string         comment '创建时间',
 	callback_time string         comment '回调时间',
-	callback_content string      comment '回调信息',
+	callback_content string      comment '回调信息'
 ) comment '退款信息日增表'
     partitioned by (dt string)
     row format delimited fields terminated by '\t' null defined as '';
@@ -276,7 +276,7 @@ create table  if not exists ods_user_info_daily
 	gender       string         comment '性别 M男,F女',
 	create_time  string         comment '创建时间',
 	operate_time string         comment '修改时间',
-	status       string         comment '状态',
+	status       string         comment '状态'
 ) comment '用户详细信息日增表'
     partitioned by (dt string)
     row format delimited fields terminated by '\t' null defined as '';

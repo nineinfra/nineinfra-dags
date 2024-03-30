@@ -283,8 +283,8 @@ def get_ods_daily2inc_sqls(data_base, start_date):
                 'activity_reduce_amount', activity_reduce_amount,
                 'coupon_reduce_amount', coupon_reduce_amount,
                 'original_total_amount', original_total_amount,
-                'freight_fee', freight_fee,
-                'freight_fee_reduce', freight_fee_reduce,
+                'feight_fee', feight_fee,
+                'feight_fee_reduce', feight_fee_reduce,
                 'refundable_time', refundable_time
             ) as data,
             map(
@@ -310,8 +310,8 @@ def get_ods_daily2inc_sqls(data_base, start_date):
                 'activity_reduce_amount', activity_reduce_amount,
                 'coupon_reduce_amount', coupon_reduce_amount,
                 'original_total_amount', original_total_amount,
-                'freight_fee', freight_fee,
-                'freight_fee_reduce', freight_fee_reduce,
+                'feight_fee', feight_fee,
+                'feight_fee_reduce', feight_fee_reduce,
                 'refundable_time', refundable_time
             ) as old
         FROM {data_base}.ods_order_info_daily
