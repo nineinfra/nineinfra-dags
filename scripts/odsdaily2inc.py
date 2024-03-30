@@ -7,7 +7,7 @@ def get_ods_daily2inc_sqls(data_base, start_date):
                 WHEN substr(operate_time, 1, 10) = '{start_date}' THEN 'update'
                 ELSE 'insert'
             END as type,
-            UNIX_TIMESTAMP(operate_time) as ts,
+            COALESCE(operate_time, create_time) as ts,
             named_struct(
                 'id', id,
                 'user_id', user_id,
@@ -52,7 +52,7 @@ def get_ods_daily2inc_sqls(data_base, start_date):
                 WHEN substr(operate_time, 1, 10) = '{start_date}' THEN 'update'
                 ELSE 'insert'
             END as type,
-            UNIX_TIMESTAMP(operate_time) as ts,
+            operate_time as ts,
             named_struct(
                 'id', id,
                 'user_id', user_id,
@@ -92,7 +92,7 @@ def get_ods_daily2inc_sqls(data_base, start_date):
                 WHEN substr(used_time, 1, 10) = '{start_date}' THEN 'update'
                 ELSE 'insert'
             END as type,
-            UNIX_TIMESTAMP(COALESCE(using_time, used_time, expire_time, get_time)) as ts,
+            COALESCE(used_time, using_time, get_time) as ts,
             named_struct(
                 'id', id,
                 'coupon_id', coupon_id,
@@ -127,7 +127,7 @@ def get_ods_daily2inc_sqls(data_base, start_date):
                 WHEN substr(cancel_time, 1, 10) = '{start_date}' THEN 'update'
                 ELSE 'insert'
             END as type,
-            UNIX_TIMESTAMP(COALESCE(cancel_time, create_time)) as ts,
+            COALESCE(cancel_time, create_time) as ts,
             named_struct(
                 'id', id,
                 'user_id', user_id,
@@ -157,7 +157,7 @@ def get_ods_daily2inc_sqls(data_base, start_date):
                 WHEN substr(create_time, 1, 10) = '{start_date}' THEN 'bootstrap-insert'
                 ELSE 'insert'
             END as type,
-            UNIX_TIMESTAMP(create_time) as ts,
+            create_time as ts,
             named_struct(
                 'id', id,
                 'order_id', order_id,
@@ -198,7 +198,7 @@ def get_ods_daily2inc_sqls(data_base, start_date):
                 WHEN substr(create_time, 1, 10) = '{start_date}' THEN 'bootstrap-insert'
                 ELSE 'insert'
             END as type,
-            UNIX_TIMESTAMP(create_time) as ts,
+            create_time as ts,
             named_struct(
                 'id', id,
                 'order_id', order_id,
@@ -228,7 +228,7 @@ def get_ods_daily2inc_sqls(data_base, start_date):
                 WHEN substr(create_time, 1, 10) = '{start_date}' THEN 'bootstrap-insert'
                 ELSE 'insert'
             END as type,
-            UNIX_TIMESTAMP(create_time) as ts,
+            create_time as ts,
             named_struct(
                 'id', id,
                 'order_id', order_id,
@@ -259,7 +259,7 @@ def get_ods_daily2inc_sqls(data_base, start_date):
                 WHEN substr(operate_time, 1, 10) = '{start_date}' THEN 'update'
                 ELSE 'insert'
             END as type,
-            UNIX_TIMESTAMP(create_time) as ts,
+            COALESCE(operate_time,create_time) as ts,
             named_struct(
                 'id', id,
                 'consignee', consignee,
@@ -325,7 +325,7 @@ def get_ods_daily2inc_sqls(data_base, start_date):
                 WHEN substr(create_time, 1, 10) = '{start_date}' THEN 'bootstrap-insert'
                 ELSE 'insert'
             END as type,
-            UNIX_TIMESTAMP(create_time) as ts,
+            create_time as ts,
             named_struct(
                 'id', id,
                 'user_id', user_id,
@@ -363,7 +363,7 @@ def get_ods_daily2inc_sqls(data_base, start_date):
                 WHEN substr(operate_time, 1, 10) = '{start_date}' THEN 'insert'
                 ELSE 'insert'
             END as type,
-            UNIX_TIMESTAMP(operate_time) as ts,
+            operate_time as ts,
             named_struct(
                 'id', id,
                 'order_id', order_id,
@@ -388,7 +388,7 @@ def get_ods_daily2inc_sqls(data_base, start_date):
                 WHEN substr(callback_time, 1, 10) = '{start_date}' THEN 'update'
                 ELSE 'insert'
             END as type,
-            UNIX_TIMESTAMP(create_time) as ts,
+            COALESCE(callback_time, create_time) as ts,
             named_struct(
                 'id', id,
                 'out_trade_no', out_trade_no,
@@ -429,7 +429,7 @@ def get_ods_daily2inc_sqls(data_base, start_date):
                 WHEN substr(callback_time, 1, 10) = '{start_date}' THEN 'update'
                 ELSE 'insert'
             END as type,
-            UNIX_TIMESTAMP(create_time) as ts,
+            COALESCE(callback_time, create_time) as ts,
             named_struct(
                 'id', id,
                 'out_trade_no', out_trade_no,
@@ -470,7 +470,7 @@ def get_ods_daily2inc_sqls(data_base, start_date):
                 WHEN substr(operate_time, 1, 10) = '{start_date}' THEN 'update'
                 ELSE 'insert'
             END as type,
-            UNIX_TIMESTAMP(operate_time) as ts,
+            COALESCE(operate_time, create_time) as ts,
             named_struct(
                 'id', id,
                 'login_name', login_name,

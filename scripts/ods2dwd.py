@@ -15,8 +15,8 @@ def get_ods2dwd_sqls(data_base, start_date):
             select data.id,\n\
                    data.user_id,\n\
                    data.sku_id,\n\
-                   date_format(from_utc_timestamp(ts * 1000, 'GMT+8'), 'yyyyMM-dd')          as date_id,\n\
-                   date_format(from_utc_timestamp(ts * 1000, 'GMT+8'), 'yyyyMM-dd HH:mm:ss') as create_time,\n\
+                   date_format(from_utc_timestamp(ts, 'GMT+8'), 'yyyyMM-dd')          as date_id,\n\
+                   date_format(from_utc_timestamp(ts, 'GMT+8'), 'yyyyMM-dd HH:mm:ss') as create_time,\n\
                    data.source_id,\n\
                    data.source_type,\n\
                    if(type = 'insert', data.sku_num, data.sku_num-old['sku_num'])             as sku_num\n\
@@ -473,10 +473,10 @@ def get_ods2dwd_sqls(data_base, start_date):
                log.last_page_id,\n\
                log.page_id,\n\
                log.source_type,\n\
-               date_format(from_utc_timestamp(log.ts, 'GMT+8'), 'yyyy-MM-dd')                                                    as date_id,\n\
-               date_format(from_utc_timestamp(log.ts, 'GMT+8'), 'yyyy-MM-dd HH:mm:ss')                                           as view_time,\n\
+               date_format(from_utc_timestamp(to_timestamp(log.ts), 'GMT+8'), 'yyyy-MM-dd')                                                    as date_id,\n\
+               date_format(from_utc_timestamp(to_timestamp(log.ts), 'GMT+8'), 'yyyy-MM-dd HH:mm:ss')                                           as view_time,\n\
                concat(log.mid_id, '-', last_value(log.session_start_point, true) over (partition by log.mid_id order by log.ts)) as session_id,\n\
-               during_time\n\
+               CAST(during_time AS BIGINT) AS during_time\n\
         from\n\
         (\n\
             select common.ar                               as area_code,\n\
@@ -521,8 +521,8 @@ def get_ods2dwd_sqls(data_base, start_date):
                log.version_code,\n\
                log.entry,\n\
                log.open_ad_id,\n\
-               date_format(from_utc_timestamp(log.ts, 'GMT+8'), 'yyyy-MM-dd')          as date_id,\n\
-               date_format(from_utc_timestamp(log.ts, 'GMT+8'), 'yyyy-MM-dd HH:mm:ss') as start_time,\n\
+               date_format(from_utc_timestamp(to_timestamp(log.ts), 'GMT+8'), 'yyyy-MM-dd')          as date_id,\n\
+               date_format(from_utc_timestamp(to_timestamp(log.ts), 'GMT+8'), 'yyyy-MM-dd HH:mm:ss') as start_time,\n\
                log.loading_time                                                        as loading_time_ms,\n\
                log.open_ad_ms,\n\
                log.open_ad_skip_ms\n\
@@ -537,14 +537,14 @@ def get_ods2dwd_sqls(data_base, start_date):
                    common.os               as operate_system,\n\
                    common.uid              as user_id,\n\
                    common.vc               as version_code,\n\
-                  \`start\`.entry,\n\
-                  \`start\`.loading_time,\n\
-                  \`start\`.open_ad_id,\n\
-                  \`start\`.open_ad_ms,\n\
-                  \`start\`.open_ad_skip_ms,\n\
+                   `start`.entry,\n\
+                   `start`.loading_time,\n\
+                   `start`.open_ad_id,\n\
+                   `start`.open_ad_ms,\n\
+                   `start`.open_ad_skip_ms,\n\
                    ts\n\
             from {data_base}.ods_log_inc\n\
-            where dt = '{start_date}' and\n\`start\n\` is not null\n\
+            where dt = '{start_date}' and `start` is not null\n\
         ) as log left join\n\
         (\n\
             select id province_id,\n\
@@ -575,8 +575,8 @@ def get_ods2dwd_sqls(data_base, start_date):
                log.action_id,\n\
                log.action_item,\n\
                log.action_item_type,\n\
-               date_format(from_utc_timestamp(log.ts, 'GMT+8'), 'yyyy-MM-dd')          as date_id,\n\
-               date_format(from_utc_timestamp(log.ts, 'GMT+8'), 'yyyy-MM-dd HH:mm:ss') as action_time\n\
+               date_format(from_utc_timestamp(to_timestamp(log.ts), 'GMT+8'), 'yyyy-MM-dd')          as date_id,\n\
+               date_format(from_utc_timestamp(to_timestamp(log.ts), 'GMT+8'), 'yyyy-MM-dd HH:mm:ss') as action_time\n\
         from\n\
         (\n\
             select common.ar          as area_code,\n\
@@ -588,7 +588,7 @@ def get_ods2dwd_sqls(data_base, start_date):
                    common.os          as operate_system,\n\
                    common.uid         as user_id,\n\
                    common.vc          as version_code,\n\
-                   page.during_time,\n\
+                   CAST(page.during_time AS BIGINT) AS during_time,\n\
                    page.item          as page_item,\n\
                    page.item_type     as page_item_type,\n\
                    page.last_page_id,\n\
@@ -627,8 +627,8 @@ def get_ods2dwd_sqls(data_base, start_date):
                log.last_page_id,\n\
                log.page_id,\n\
                log.source_type,\n\
-               date_format(from_utc_timestamp(log.ts, 'GMT+8'), 'yyyy-MM-dd')          as date_id,\n\
-               date_format(from_utc_timestamp(log.ts, 'GMT+8'), 'yyyy-MM-dd HH:mm:ss') as display_time,\n\
+               date_format(from_utc_timestamp(to_timestamp(log.ts), 'GMT+8'), 'yyyy-MM-dd')          as date_id,\n\
+               date_format(from_utc_timestamp(to_timestamp(log.ts), 'GMT+8'), 'yyyy-MM-dd HH:mm:ss') as display_time,\n\
                log.display_type,\n\
                log.display_item,\n\
                log.display_item_type,\n\
@@ -645,7 +645,7 @@ def get_ods2dwd_sqls(data_base, start_date):
                    common.os             as operate_system,\n\
                    common.uid            as user_id,\n\
                    common.vc             as version_code,\n\
-                   page.during_time,\n\
+                   CAST(page.during_time AS BIGINT) AS during_time,\n\
                    page.item             as page_item,\n\
                    page.item_type        as page_item_type,\n\
                    page.last_page_id,\n\
@@ -654,8 +654,8 @@ def get_ods2dwd_sqls(data_base, start_date):
                    display.display_type,\n\
                    display.item          as display_item,\n\
                    display.item_type     as display_item_type,\n\
-                   display.\n\`order\n\`        as display_order,\n\
-                   display.pos_id        as display_pos_id,\n\
+                   CAST(display.`order` AS BIGINT)       as display_order,\n\
+                   CAST(display.pos_id AS BIGINT)        as display_pos_id,\n\
                    ts\n\
             from {data_base}.ods_log_inc lateral view explode(displays) tmp as display\n\
             where dt = '{start_date}' and displays is not null\n\
@@ -693,8 +693,8 @@ def get_ods2dwd_sqls(data_base, start_date):
                log.open_ad_skip_ms,\n\
                log.actions,\n\
                log.displays,\n\
-               date_format(from_utc_timestamp(log.ts, 'GMT+8'), 'yyyy-MM-dd')          as date_id,\n\
-               date_format(from_utc_timestamp(log.ts, 'GMT+8'), 'yyyy-MM-dd HH:mm:ss') as error_time,\n\
+               date_format(from_utc_timestamp(to_timestamp(log.ts), 'GMT+8'), 'yyyy-MM-dd')          as date_id,\n\
+               date_format(from_utc_timestamp(to_timestamp(log.ts), 'GMT+8'), 'yyyy-MM-dd HH:mm:ss') as error_time,\n\
                log.error_code,\n\
                log.error_msg\n\
         from\n\
@@ -714,11 +714,11 @@ def get_ods2dwd_sqls(data_base, start_date):
                    page.last_page_id,\n\
                    page.page_id,\n\
                    page.source_type,\n\
-                  \`start\`.entry,\n\
-                  \`start\`.loading_time,\n\
-                  \`start\`.open_ad_id,\n\
-                  \`start\`.open_ad_ms,\n\
-                  \`start\`.open_ad_skip_ms,\n\
+                   `start`.entry,\n\
+                   `start`.loading_time,\n\
+                   `start`.open_ad_id,\n\
+                   `start`.open_ad_ms,\n\
+                   `start`.open_ad_skip_ms,\n\
                    actions,\n\
                    displays,\n\
                    err.error_code,\n\
@@ -779,8 +779,8 @@ def get_ods2dwd_sqls(data_base, start_date):
     dwd_user_login_inc = f"\n\
         insert overwrite table {data_base}.dwd_user_login_inc partition (dt = '{start_date}')\n\
         select user_id,\n\
-               date_format(from_utc_timestamp(log.ts, 'GMT+8'), 'yyyy-MM-dd')          as date_id,\n\
-               date_format(from_utc_timestamp(log.ts, 'GMT+8'), 'yyyy-MM-dd HH:mm:ss') as login_time,\n\
+               date_format(from_utc_timestamp(to_timestamp(log.ts), 'GMT+8'), 'yyyy-MM-dd')          as date_id,\n\
+               date_format(from_utc_timestamp(to_timestamp(log.ts), 'GMT+8'), 'yyyy-MM-dd HH:mm:ss') as login_time,\n\
                log.channel,\n\
                base_province.province_id,\n\
                log.version_code,\n\

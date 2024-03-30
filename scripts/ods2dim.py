@@ -122,7 +122,9 @@ def get_ods2dim_sqls(data_base, start_date):
                    sku_name,\n\
                    sku_desc,\n\
                    weight,\n\
-                   is_sale,\n\
+                   CASE WHEN is_sale = '1' THEN true\n\
+                        WHEN is_sale = '0' THEN false\n\
+                   END AS is_sale,\n\
                    spu_id,\n\
                    category3_id,\n\
                    tm_id,\n\
@@ -207,7 +209,9 @@ def get_ods2dim_sqls(data_base, start_date):
                 sku.sku_name,\n\
                 sku.sku_desc,\n\
                 sku.weight,\n\
-                sku.is_sale,\n\
+                CASE WHEN sku.is_sale = '1' THEN true\n\
+                     WHEN sku.is_sale = '0' THEN false\n\
+                END AS is_sale,\n\
                 sku.spu_id,\n\
                 spu.spu_name,\n\
                 sku.category3_id,\n\
