@@ -33,7 +33,8 @@ def create_dynamic_dag(name_space, name, index, yaml_file_name):
                 'email_on_retry': False,
                 'retries': 5,
                 'retry_delay': timedelta(minutes=5)}
-    with DAG(dag_id=f'{dag_prefix}{source}2{sink}-{index}',
+    table_name = os.path.splitext(os.path.basename(yaml_file_name))[0]
+    with DAG(dag_id=f'{dag_prefix}{source}2{sink}-{index}-{table_name}',
              default_args=dag_args,
              description='Dynamically create and monitor seatunneljobs in Kubernetes from YAML files',
              schedule=timedelta(days=1),

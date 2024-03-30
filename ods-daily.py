@@ -13,7 +13,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "scripts"))
 import gensql
 
 job_type = "ods"
-sync_type = "full"  # full, inc
+sync_type = "daily"  # full, inc, daily
 dag_id_name = f'nineinfra-{job_type}-{sync_type}'
 
 dag_args = {'owner': 'airflow',
@@ -29,24 +29,12 @@ dag_args = {'owner': 'airflow',
 dag_instance = DAG(dag_id=f'{dag_id_name}',
                    default_args=dag_args,
                    schedule_interval='@once',
-                   start_date=days_ago(1),
+                   start_date=days_ago(0),
                    dagrun_timeout=timedelta(minutes=60),
                    description=f'executing the sql and hql scripts for the {job_type} {sync_type}', )
 
-create_table = HiveOperator(hql=f"sqls/create_{job_type}_tables.sql",
-                            task_id=f"create_{job_type}_tables_task",
-                            hive_cli_conn_id="hive_conn",
-                            trigger_rule='all_done',
-                            dag=dag_instance)
-
-create_daily_table = HiveOperator(hql=f"sqls/create_{job_type}_daily_tables.sql",
-                                  task_id=f"create_{job_type}_daily_tables_task",
-                                  hive_cli_conn_id="hive_conn",
-                                  trigger_rule='all_done',
-                                  dag=dag_instance)
-
 generate_sql = PythonOperator(task_id="generate_sql_task",
-                              python_callable=gensql.generate_etl2ods_full_sql,
+                              python_callable=gensql.generate_etl2ods_daily_sql,
                               op_kwargs={'datahouse_dir': Variable.get("datahouse_dir"),
                                          'start_date': airflow.utils.dates.days_ago(0).date()},
                               provide_context=True,
@@ -58,4 +46,4 @@ load_data = HiveOperator(hql=f'sqls/etl2ods_{sync_type}.sql',
                          trigger_rule='all_done',
                          dag=dag_instance)
 
-create_table >> create_daily_table >> generate_sql >> load_data
+generate_sql >> load_data

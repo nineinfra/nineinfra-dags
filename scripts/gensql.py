@@ -3,6 +3,7 @@ import os
 import sys
 
 sys.path.append(os.path.join(os.path.dirname(__file__)))
+import odsdaily2inc
 import ods2dwdinit
 import ods2diminit
 import ods2dim
@@ -23,9 +24,14 @@ FULL_LOAD_TABLES = ["activity_info", "activity_rule", "base_category1",
                     "cart_info", "coupon_info", "sku_attr_value",
                     "sku_info", "sku_sale_attr_value", "spu_info"]
 
-INC_LOAD_TABLES = ["cart_info", "comment_info", "ods_coupon_use", "ods_favor_info",
-                   "order_detail", "order_detail_activity", "ods_order_detail_coupon",
-                   "order_info", "order_refund_info", "ods_order_status_log",
+DAILY_LOAD_TABLES = ["cart_info", "comment_info", "coupon_use", "favor_info",
+                     "order_detail", "order_detail_activity", "order_detail_coupon",
+                     "order_info", "order_refund_info", "order_status_log",
+                     "payment_info", "refund_payment", "user_info"]
+
+INC_LOAD_TABLES = ["cart_info", "comment_info", "coupon_use", "favor_info",
+                   "order_detail", "order_detail_activity", "order_detail_coupon",
+                   "order_info", "order_refund_info", "order_status_log",
                    "payment_info", "refund_payment", "user_info"]
 
 
@@ -45,19 +51,33 @@ def generate_etl2ods_full_sql(datahouse_dir, start_date):
         f.write(sql_file_data)
 
 
-# 生成增量数据加载到ods的sql
-def generate_etl2ods_inc_sql(datahouse_dir, start_date):
+# 生成日增数据加载到ods的sql
+def generate_etl2ods_daily_sql(datahouse_dir, start_date):
     sql_load_log = f"load data inpath '{datahouse_dir}{ETL_LOG_DIR}/{start_date}' into table {DATA_BASE}.ods_log_inc partition(dt='{start_date}');\n"
     sql_file_data = sql_load_log
 
     # 从Inc目录下加载该表的所有日期为start_date的文件,文件格式为 2024.03.25_0.parquet，2024.03.25_1.parquet等等
-    for table in INC_LOAD_TABLES:
-        ods_table = f'ods_{table}_inc'
-        # 获取{ETL_DB_INC_DIR}/{table}这个目录下以{start_date}为前缀的文件列表，使用通配符*实现
-        sql_file_data += f"load data inpath '{datahouse_dir}{ETL_DB_INC_DIR}/{table}/{start_date}*' into table {DATA_BASE}.{ods_table} partition(dt='{start_date}');\n"
+    for table in DAILY_LOAD_TABLES:
+        ods_table = f'ods_{table}_daily'
+        # todo 获取{ETL_DB_INC_DIR}/{table}这个目录下以{start_date}为前缀的文件列表，使用通配符*实现
+        dot_formated_start_date = start_date.strftime("%Y.%m.%d")
+        sql_file_data += f"load data inpath '{datahouse_dir}{ETL_DB_INC_DIR}/{table}/{dot_formated_start_date}_0.parquet' into table {DATA_BASE}.{ods_table} partition(dt='{start_date}');\n"
 
     # 将 SQL_FILE_DATA 写入文件
-    with open(f"{SQL_FILE_DIR}/etl2ods_inc.sql", 'w') as f:
+    with open(f"{SQL_FILE_DIR}/etl2ods_daily.sql", 'w') as f:
+        f.write(sql_file_data)
+
+
+# 生成增量数据加载到ods的sql(模拟cdc)
+def generate_ods_daily2inc_sql(start_date):
+    daily2inc_sqls = odsdaily2inc.get_ods_daily2inc_sqls(DATA_BASE, start_date)
+    sql_file_data = ""
+
+    for sql in daily2inc_sqls:
+        sql_file_data += sql
+
+    # 将 SQL_FILE_DATA 写入文件
+    with open(f"{SQL_FILE_DIR}/ods_daily2inc.sql", 'w') as f:
         f.write(sql_file_data)
 
 
@@ -148,7 +168,8 @@ def generate_dws2ads_sql(start_date):
 if __name__ == '__main__':
     MINIO_DATAHOUSE_DIR = "s3a://nineinfra/datahouse"
     generate_etl2ods_full_sql(MINIO_DATAHOUSE_DIR, datetime.date(2024, 3, 25))
-    generate_etl2ods_inc_sql(MINIO_DATAHOUSE_DIR, datetime.date(2024, 3, 25))
+    generate_etl2ods_daily_sql(MINIO_DATAHOUSE_DIR, datetime.date(2024, 3, 25))
+    generate_ods_daily2inc_sql(datetime.date(2024, 3, 25))
     generate_ods2dwd_init_sql(datetime.date(2024, 3, 25))
     generate_ods2dim_init_sql(MINIO_DATAHOUSE_DIR, datetime.date(2024, 3, 25))
     generate_ods2dim_sql(datetime.date(2024, 3, 25))
