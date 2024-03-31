@@ -1,852 +1,852 @@
 def get_ods2dwd_sqls(data_base, start_date):
-    dwd_trade_cart_add_inc = f"\n\
-        insert overwrite table {data_base}.dwd_trade_cart_add_inc partition (dt = '{start_date}')\n\
-        select cart.id,\n\
-               cart.user_id,\n\
-               cart.sku_id,\n\
-               cart.date_id,\n\
-               cart.create_time,\n\
-               cart.source_id,\n\
-               cart.source_type                            as source_type_code,\n\
-               dic.dic_name                                as source_type_name,\n\
-               cart.sku_num\n\
-        from\n\
-        (\n\
-            select data.id,\n\
-                   data.user_id,\n\
-                   data.sku_id,\n\
-                   date_format(from_utc_timestamp(ts, 'GMT+8'), 'yyyyMM-dd')          as date_id,\n\
-                   date_format(from_utc_timestamp(ts, 'GMT+8'), 'yyyyMM-dd HH:mm:ss') as create_time,\n\
-                   data.source_id,\n\
-                   data.source_type,\n\
-                   if(type = 'insert', data.sku_num, data.sku_num-old['sku_num'])             as sku_num\n\
-            from {data_base}.ods_cart_info_inc\n\
-            where   dt    = '{start_date}'\n\
-                and (type = 'insert' or (type = 'update' and old['sku_num'] is not null and data.sku_num > cast(old['sku_num'] as int)))\n\
-        ) as cart left join\n\
-        (\n\
-            select dic_code,\n\
-                   dic_name\n\
-            from {data_base}.ods_base_dic_full\n\
-            where dt = '{start_date}' and parent_code = '24'\n\
-        ) as dic on cart.source_type = dic.dic_code;"
+    dwd_trade_cart_add_inc = f"""
+        insert overwrite table {data_base}.dwd_trade_cart_add_inc partition (dt = '{start_date}')
+        select cart.id,
+               cart.user_id,
+               cart.sku_id,
+               cart.date_id,
+               cart.create_time,
+               cart.source_id,
+               cart.source_type                            as source_type_code,
+               dic.dic_name                                as source_type_name,
+               cart.sku_num
+        from
+        (
+            select data.id,
+                   data.user_id,
+                   data.sku_id,
+                   date_format(from_utc_timestamp(ts, 'GMT+8'), 'yyyyMM-dd')          as date_id,
+                   date_format(from_utc_timestamp(ts, 'GMT+8'), 'yyyyMM-dd HH:mm:ss') as create_time,
+                   data.source_id,
+                   data.source_type,
+                   if(type = 'insert', data.sku_num, data.sku_num-old['sku_num'])             as sku_num
+            from {data_base}.ods_cart_info_inc
+            where   dt    = '{start_date}'
+                and (type = 'insert' or (type = 'update' and old['sku_num'] is not null and data.sku_num > cast(old['sku_num'] as int)))
+        ) as cart left join
+        (
+            select dic_code,
+                   dic_name
+            from {data_base}.ods_base_dic_full
+            where dt = '{start_date}' and parent_code = '24'
+        ) as dic on cart.source_type = dic.dic_code;"""
 
-    dwd_trade_order_detail_inc = f"\n\
-        insert overwrite table {data_base}.dwd_trade_order_detail_inc partition (dt = '{start_date}')\n\
-        select detail.id,\n\
-               detail.order_id,\n\
-               info.user_id,\n\
-               detail.sku_id,\n\
-               info.province_id,\n\
-               activity.activity_id,\n\
-               activity.activity_rule_id,\n\
-               coupon.coupon_id,\n\
-               date_format(detail.create_time, 'yyyy-MM-dd')  as date_id,\n\
-               detail.create_time,\n\
-               detail.source_id,\n\
-               detail.source_type                             as source_type_code,\n\
-               dic.dic_name                                   as source_type_name,\n\
-               detail.sku_num,\n\
-               detail.split_original_amount,\n\
-               detail.split_activity_amount,\n\
-               detail.split_coupon_amount,\n\
-               detail.split_total_amount\n\
-        from\n\
-        (\n\
-            select data.id,\n\
-                   data.order_id,\n\
-                   data.sku_id,\n\
-                   data.create_time,\n\
-                   data.source_id,\n\
-                   data.source_type,\n\
-                   data.sku_num,\n\
-                   data.sku_num * data.order_price as split_original_amount,\n\
-                   data.split_total_amount,\n\
-                   data.split_activity_amount,\n\
-                   data.split_coupon_amount\n\
-            from {data_base}.ods_order_detail_inc\n\
-            where dt = '{start_date}' and type = 'insert'\n\
-        ) as detail left join\n\
-        (\n\
-            select data.id,\n\
-                   data.user_id,\n\
-                   data.province_id\n\
-            from {data_base}.ods_order_info_inc\n\
-            where dt = '{start_date}' and type = 'insert'\n\
-        ) as info\n\
-            on detail.order_id = info.id\n\
-        left join\n\
-        (\n\
-            select data.order_detail_id,\n\
-                   data.activity_id,\n\
-                   data.activity_rule_id\n\
-            from {data_base}.ods_order_detail_activity_inc\n\
-            where dt = '{start_date}' and type = 'insert'\n\
-        ) as activity\n\
-            on detail.id = activity.order_detail_id\n\
-        left join\n\
-        (\n\
-            select data.order_detail_id,\n\
-                   data.coupon_id\n\
-            from {data_base}.ods_order_detail_coupon_inc\n\
-            where dt = '{start_date}' and type = 'insert'\n\
-        ) as coupon\n\
-            on detail.id = coupon.order_detail_id\n\
-        left join\n\
-        (\n\
-            select dic_code,\n\
-                   dic_name\n\
-            from {data_base}.ods_base_dic_full\n\
-            where dt = '{start_date}' and parent_code = '24'\n\
-        ) as dic on detail.source_type = dic.dic_code;"
+    dwd_trade_order_detail_inc = f"""
+        insert overwrite table {data_base}.dwd_trade_order_detail_inc partition (dt = '{start_date}')
+        select detail.id,
+               detail.order_id,
+               info.user_id,
+               detail.sku_id,
+               info.province_id,
+               activity.activity_id,
+               activity.activity_rule_id,
+               coupon.coupon_id,
+               date_format(detail.create_time, 'yyyy-MM-dd')  as date_id,
+               detail.create_time,
+               detail.source_id,
+               detail.source_type                             as source_type_code,
+               dic.dic_name                                   as source_type_name,
+               detail.sku_num,
+               detail.split_original_amount,
+               detail.split_activity_amount,
+               detail.split_coupon_amount,
+               detail.split_total_amount
+        from
+        (
+            select data.id,
+                   data.order_id,
+                   data.sku_id,
+                   data.create_time,
+                   data.source_id,
+                   data.source_type,
+                   data.sku_num,
+                   data.sku_num * data.order_price as split_original_amount,
+                   data.split_total_amount,
+                   data.split_activity_amount,
+                   data.split_coupon_amount
+            from {data_base}.ods_order_detail_inc
+            where dt = '{start_date}' and type = 'insert'
+        ) as detail left join
+        (
+            select data.id,
+                   data.user_id,
+                   data.province_id
+            from {data_base}.ods_order_info_inc
+            where dt = '{start_date}' and type = 'insert'
+        ) as info
+            on detail.order_id = info.id
+        left join
+        (
+            select data.order_detail_id,
+                   data.activity_id,
+                   data.activity_rule_id
+            from {data_base}.ods_order_detail_activity_inc
+            where dt = '{start_date}' and type = 'insert'
+        ) as activity
+            on detail.id = activity.order_detail_id
+        left join
+        (
+            select data.order_detail_id,
+                   data.coupon_id
+            from {data_base}.ods_order_detail_coupon_inc
+            where dt = '{start_date}' and type = 'insert'
+        ) as coupon
+            on detail.id = coupon.order_detail_id
+        left join
+        (
+            select dic_code,
+                   dic_name
+            from {data_base}.ods_base_dic_full
+            where dt = '{start_date}' and parent_code = '24'
+        ) as dic on detail.source_type = dic.dic_code;"""
 
-    dwd_trade_cancel_detail_inc = f"\n\
-        insert overwrite table {data_base}.dwd_trade_cancel_detail_inc partition (dt = '{start_date}')\n\
-        select detail.id,\n\
-               detail.order_id,\n\
-               info.user_id,\n\
-               detail.sku_id,\n\
-               info.province_id,\n\
-               activity.activity_id,\n\
-               activity.activity_rule_id,\n\
-               coupon.coupon_id,\n\
-               date_format(info.canel_time, 'yyyy-MM-dd') as date_id,\n\
-               info.canel_time,\n\
-               detail.source_id ,\n\
-               detail.source_type                         as source_type_code,\n\
-               dic.dic_name                               as source_type_name,\n\
-               detail.sku_num,\n\
-               detail.split_original_amount,\n\
-               detail.split_activity_amount,\n\
-               detail.split_coupon_amount,\n\
-               detail.split_total_amount\n\
-        from\n\
-        (\n\
-            select data.id,\n\
-                   data.order_id,\n\
-                   data.sku_id,\n\
-                   data.source_id,\n\
-                   data.source_type,\n\
-                   data.sku_num,\n\
-                   data.sku_num * data.order_price split_original_amount,\n\
-                   data.split_total_amount,\n\
-                   data.split_activity_amount,\n\
-                   data.split_coupon_amount\n\
-            from {data_base}.ods_order_detail_inc\n\
-            where (dt = '{start_date}' or dt = date_add('{start_date}', -1)) and (type = 'insert' or type = 'bootstrap-insert')\n\
-        ) as detail join\n\
-        (\n\
-            select data.id,\n\
-                   data.user_id,\n\
-                   data.province_id,\n\
-                   data.operate_time  as canel_time\n\
-            from {data_base}.ods_order_info_inc\n\
-            where   dt = '{start_date}' and type = 'update' and data.order_status = '1003'\n\
-                and array_contains(map_keys(old), 'order_status')\n\
-        ) as info\n\
-            on detail.order_id = info.id\n\
-        left join\n\
-        (\n\
-            select data.order_detail_id,\n\
-                   data.activity_id,\n\
-                   data.activity_rule_id\n\
-            from {data_base}.ods_order_detail_activity_inc\n\
-            where (dt = '{start_date}' or dt = date_add('{start_date}', -1)) and (type = 'insert' or type = 'bootstrap-insert')\n\
-        ) as activity\n\
-            on detail.id = activity.order_detail_id\n\
-        left join\n\
-        (\n\
-            select data.order_detail_id,\n\
-                   data.coupon_id\n\
-            from {data_base}.ods_order_detail_coupon_inc\n\
-            where (dt = '{start_date}' or dt = date_add('{start_date}', -1)) and (type = 'insert' or type = 'bootstrap-insert')\n\
-        ) as coupon\n\
-            on detail.id = coupon.order_detail_id\n\
-        left join\n\
-        (\n\
-            select dic_code,\n\
-                   dic_name\n\
-            from {data_base}.ods_base_dic_full\n\
-            where dt = '{start_date}' and parent_code = '24'\n\
-        ) as dic on detail.source_type = dic.dic_code;"
+    dwd_trade_cancel_detail_inc = f"""
+        insert overwrite table {data_base}.dwd_trade_cancel_detail_inc partition (dt = '{start_date}')
+        select detail.id,
+               detail.order_id,
+               info.user_id,
+               detail.sku_id,
+               info.province_id,
+               activity.activity_id,
+               activity.activity_rule_id,
+               coupon.coupon_id,
+               date_format(info.canel_time, 'yyyy-MM-dd') as date_id,
+               info.canel_time,
+               detail.source_id ,
+               detail.source_type                         as source_type_code,
+               dic.dic_name                               as source_type_name,
+               detail.sku_num,
+               detail.split_original_amount,
+               detail.split_activity_amount,
+               detail.split_coupon_amount,
+               detail.split_total_amount
+        from
+        (
+            select data.id,
+                   data.order_id,
+                   data.sku_id,
+                   data.source_id,
+                   data.source_type,
+                   data.sku_num,
+                   data.sku_num * data.order_price split_original_amount,
+                   data.split_total_amount,
+                   data.split_activity_amount,
+                   data.split_coupon_amount
+            from {data_base}.ods_order_detail_inc
+            where (dt = '{start_date}' or dt = date_add('{start_date}', -1)) and (type = 'insert' or type = 'bootstrap-insert')
+        ) as detail join
+        (
+            select data.id,
+                   data.user_id,
+                   data.province_id,
+                   data.operate_time  as canel_time
+            from {data_base}.ods_order_info_inc
+            where   dt = '{start_date}' and type = 'update' and data.order_status = '1003'
+                and array_contains(map_keys(old), 'order_status')
+        ) as info
+            on detail.order_id = info.id
+        left join
+        (
+            select data.order_detail_id,
+                   data.activity_id,
+                   data.activity_rule_id
+            from {data_base}.ods_order_detail_activity_inc
+            where (dt = '{start_date}' or dt = date_add('{start_date}', -1)) and (type = 'insert' or type = 'bootstrap-insert')
+        ) as activity
+            on detail.id = activity.order_detail_id
+        left join
+        (
+            select data.order_detail_id,
+                   data.coupon_id
+            from {data_base}.ods_order_detail_coupon_inc
+            where (dt = '{start_date}' or dt = date_add('{start_date}', -1)) and (type = 'insert' or type = 'bootstrap-insert')
+        ) as coupon
+            on detail.id = coupon.order_detail_id
+        left join
+        (
+            select dic_code,
+                   dic_name
+            from {data_base}.ods_base_dic_full
+            where dt = '{start_date}' and parent_code = '24'
+        ) as dic on detail.source_type = dic.dic_code;"""
 
-    dwd_trade_pay_detail_suc_inc = f"\n\
-        insert overwrite table {data_base}.dwd_trade_pay_detail_suc_inc partition (dt = '{start_date}')\n\
-        select detail.id,\n\
-               detail.order_id,\n\
-               payment.user_id,\n\
-               detail.sku_id,\n\
-               info.province_id,\n\
-               activity.activity_id,\n\
-               activity.activity_rule_id,\n\
-               coupon.coupon_id,\n\
-               payment.payment_type                             as payment_type_code,\n\
-               pay_dic.dic_name                                 as payment_type_name,\n\
-               date_format(payment.callback_time, 'yyyy-MM-dd') as date_id,\n\
-               payment.callback_time,\n\
-               detail.source_id,\n\
-               detail.source_type                               as source_type_code,\n\
-               src_dic.dic_name                                 as source_type_name,\n\
-               detail.sku_num,\n\
-               detail.split_original_amount,\n\
-               detail.split_activity_amount,\n\
-               detail.split_coupon_amount,\n\
-               detail.split_total_amount\n\
-        from\n\
-        (\n\
-            select data.id,\n\
-                   data.order_id,\n\
-                   data.sku_id,\n\
-                   data.source_id,\n\
-                   data.source_type,\n\
-                   data.sku_num,\n\
-                   data.sku_num * data.order_price as split_original_amount,\n\
-                   data.split_total_amount,\n\
-                   data.split_activity_amount,\n\
-                   data.split_coupon_amount\n\
-            from {data_base}.ods_order_detail_inc\n\
-            where (dt = '{start_date}' or dt = date_add('{start_date}', -1)) and (type = 'insert' or type = 'bootstrap-insert')\n\
-        ) as detail join\n\
-        (\n\
-            select data.user_id,\n\
-                   data.order_id,\n\
-                   data.payment_type,\n\
-                   data.callback_time\n\
-            from {data_base}.ods_payment_info_inc\n\
-            where   dt                  = '{start_date}'\n\
-                and data.payment_status = '1602'\n\
-                and type                = 'update'\n\
-                and array_contains(map_keys(old), 'payment_status')\n\
-        ) as payment\n\
-            on detail.order_id = payment.order_id\n\
-        left join\n\
-        (\n\
-            select data.id,\n\
-                   data.province_id\n\
-            from {data_base}.ods_order_info_inc\n\
-            where (dt = '{start_date}' or dt = date_add('{start_date}', -1)) and (type = 'insert' or type = 'bootstrap-insert')\n\
-        ) as info\n\
-            on detail.order_id = info.id\n\
-        left join\n\
-        (\n\
-            select data.order_detail_id,\n\
-                   data.activity_id,\n\
-                   data.activity_rule_id\n\
-            from {data_base}.ods_order_detail_activity_inc\n\
-            where (dt = '{start_date}' or dt = date_add('{start_date}', -1)) and (type = 'insert' or type = 'bootstrap-insert')\n\
-        ) as activity\n\
-            on detail.id = activity.order_detail_id\n\
-        left join\n\
-        (\n\
-            select data.order_detail_id,\n\
-                   data.coupon_id\n\
-            from {data_base}.ods_order_detail_coupon_inc\n\
-            where (dt = '{start_date}' or dt = date_add('{start_date}', -1)) and (type = 'insert' or type = 'bootstrap-insert')\n\
-        ) as coupon\n\
-            on detail.id = coupon.order_detail_id\n\
-        left join\n\
-        (\n\
-            select dic_code,\n\
-                   dic_name\n\
-            from {data_base}.ods_base_dic_full\n\
-            where dt = '{start_date}' and parent_code = '11'\n\
-        ) as pay_dic\n\
-            on payment.payment_type = pay_dic.dic_code\n\
-        left join\n\
-        (\n\
-            select dic_code,\n\
-                   dic_name\n\
-            from {data_base}.ods_base_dic_full\n\
-            where dt = '{start_date}' and parent_code = '24'\n\
-        ) as src_dic on detail.source_type = src_dic.dic_code;"
+    dwd_trade_pay_detail_suc_inc = f"""
+        insert overwrite table {data_base}.dwd_trade_pay_detail_suc_inc partition (dt = '{start_date}')
+        select detail.id,
+               detail.order_id,
+               payment.user_id,
+               detail.sku_id,
+               info.province_id,
+               activity.activity_id,
+               activity.activity_rule_id,
+               coupon.coupon_id,
+               payment.payment_type                             as payment_type_code,
+               pay_dic.dic_name                                 as payment_type_name,
+               date_format(payment.callback_time, 'yyyy-MM-dd') as date_id,
+               payment.callback_time,
+               detail.source_id,
+               detail.source_type                               as source_type_code,
+               src_dic.dic_name                                 as source_type_name,
+               detail.sku_num,
+               detail.split_original_amount,
+               detail.split_activity_amount,
+               detail.split_coupon_amount,
+               detail.split_total_amount
+        from
+        (
+            select data.id,
+                   data.order_id,
+                   data.sku_id,
+                   data.source_id,
+                   data.source_type,
+                   data.sku_num,
+                   data.sku_num * data.order_price as split_original_amount,
+                   data.split_total_amount,
+                   data.split_activity_amount,
+                   data.split_coupon_amount
+            from {data_base}.ods_order_detail_inc
+            where (dt = '{start_date}' or dt = date_add('{start_date}', -1)) and (type = 'insert' or type = 'bootstrap-insert')
+        ) as detail join
+        (
+            select data.user_id,
+                   data.order_id,
+                   data.payment_type,
+                   data.callback_time
+            from {data_base}.ods_payment_info_inc
+            where   dt                  = '{start_date}'
+                and data.payment_status = '1602'
+                and type                = 'update'
+                and array_contains(map_keys(old), 'payment_status')
+        ) as payment
+            on detail.order_id = payment.order_id
+        left join
+        (
+            select data.id,
+                   data.province_id
+            from {data_base}.ods_order_info_inc
+            where (dt = '{start_date}' or dt = date_add('{start_date}', -1)) and (type = 'insert' or type = 'bootstrap-insert')
+        ) as info
+            on detail.order_id = info.id
+        left join
+        (
+            select data.order_detail_id,
+                   data.activity_id,
+                   data.activity_rule_id
+            from {data_base}.ods_order_detail_activity_inc
+            where (dt = '{start_date}' or dt = date_add('{start_date}', -1)) and (type = 'insert' or type = 'bootstrap-insert')
+        ) as activity
+            on detail.id = activity.order_detail_id
+        left join
+        (
+            select data.order_detail_id,
+                   data.coupon_id
+            from {data_base}.ods_order_detail_coupon_inc
+            where (dt = '{start_date}' or dt = date_add('{start_date}', -1)) and (type = 'insert' or type = 'bootstrap-insert')
+        ) as coupon
+            on detail.id = coupon.order_detail_id
+        left join
+        (
+            select dic_code,
+                   dic_name
+            from {data_base}.ods_base_dic_full
+            where dt = '{start_date}' and parent_code = '11'
+        ) as pay_dic
+            on payment.payment_type = pay_dic.dic_code
+        left join
+        (
+            select dic_code,
+                   dic_name
+            from {data_base}.ods_base_dic_full
+            where dt = '{start_date}' and parent_code = '24'
+        ) as src_dic on detail.source_type = src_dic.dic_code;"""
 
-    dwd_trade_order_refund_inc = f"\n\
-        insert overwrite table {data_base}.dwd_trade_order_refund_inc partition (dt = '{start_date}')\n\
-        select refund.id,\n\
-               refund.user_id,\n\
-               refund.order_id,\n\
-               refund.sku_id,\n\
-               order_info.province_id,\n\
-               date_format(refund.create_time, 'yyyy-MM-dd') as date_id,\n\
-               refund.create_time,\n\
-               refund.refund_type                            as refund_type_code,\n\
-               type_dic.dic_name                             as refund_type_name,\n\
-               refund.refund_reason_type                     as refund_reason_type_code,\n\
-               reason_dic.dic_name                           as refund_reason_type_name,\n\
-               refund.refund_reason_txt,\n\
-               refund.refund_num,\n\
-               refund.refund_amount\n\
-        from\n\
-        (\n\
-            select data.id,\n\
-                   data.user_id,\n\
-                   data.order_id,\n\
-                   data.sku_id,\n\
-                   data.refund_type,\n\
-                   data.refund_num,\n\
-                   data.refund_amount,\n\
-                   data.refund_reason_type,\n\
-                   data.refund_reason_txt,\n\
-                   data.create_time\n\
-            from {data_base}.ods_order_refund_info_inc\n\
-            where dt = '{start_date}' and type = 'insert'\n\
-        ) as refund left join\n\
-        (\n\
-            select data.id,\n\
-                   data.province_id\n\
-            from {data_base}.ods_order_info_inc\n\
-            where                dt   = '{start_date}'\n\
-                             and type = 'update'\n\
-                and data.order_status = '1005'\n\
-                and array_contains(map_keys(old), 'order_status')\n\
-        ) as order_info\n\
-            on refund.order_id = order_info.id\n\
-        left join\n\
-        (\n\
-            select dic_code,\n\
-                   dic_name\n\
-            from {data_base}.ods_base_dic_full\n\
-            where dt = '{start_date}' and parent_code = '15'\n\
-        ) as type_dic\n\
-            on refund.refund_type = type_dic.dic_code\n\
-        left join\n\
-        (\n\
-            select dic_code,\n\
-                   dic_name\n\
-            from {data_base}.ods_base_dic_full\n\
-            where dt = '{start_date}' and parent_code = '13'\n\
-        ) reason_dic on refund.refund_reason_type = reason_dic.dic_code;"
+    dwd_trade_order_refund_inc = f"""
+        insert overwrite table {data_base}.dwd_trade_order_refund_inc partition (dt = '{start_date}')
+        select refund.id,
+               refund.user_id,
+               refund.order_id,
+               refund.sku_id,
+               order_info.province_id,
+               date_format(refund.create_time, 'yyyy-MM-dd') as date_id,
+               refund.create_time,
+               refund.refund_type                            as refund_type_code,
+               type_dic.dic_name                             as refund_type_name,
+               refund.refund_reason_type                     as refund_reason_type_code,
+               reason_dic.dic_name                           as refund_reason_type_name,
+               refund.refund_reason_txt,
+               refund.refund_num,
+               refund.refund_amount
+        from
+        (
+            select data.id,
+                   data.user_id,
+                   data.order_id,
+                   data.sku_id,
+                   data.refund_type,
+                   data.refund_num,
+                   data.refund_amount,
+                   data.refund_reason_type,
+                   data.refund_reason_txt,
+                   data.create_time
+            from {data_base}.ods_order_refund_info_inc
+            where dt = '{start_date}' and type = 'insert'
+        ) as refund left join
+        (
+            select data.id,
+                   data.province_id
+            from {data_base}.ods_order_info_inc
+            where                dt   = '{start_date}'
+                             and type = 'update'
+                and data.order_status = '1005'
+                and array_contains(map_keys(old), 'order_status')
+        ) as order_info
+            on refund.order_id = order_info.id
+        left join
+        (
+            select dic_code,
+                   dic_name
+            from {data_base}.ods_base_dic_full
+            where dt = '{start_date}' and parent_code = '15'
+        ) as type_dic
+            on refund.refund_type = type_dic.dic_code
+        left join
+        (
+            select dic_code,
+                   dic_name
+            from {data_base}.ods_base_dic_full
+            where dt = '{start_date}' and parent_code = '13'
+        ) reason_dic on refund.refund_reason_type = reason_dic.dic_code;"""
 
-    dwd_trade_refund_pay_suc_inc = f"\n\
-        insert overwrite table {data_base}.dwd_trade_refund_pay_suc_inc partition (dt = '{start_date}')\n\
-        select refund_payment.id,\n\
-               order_info.user_id,\n\
-               refund_payment.order_id,\n\
-               refund_payment.sku_id,\n\
-               order_info.province_id,\n\
-               refund_payment.payment_type              as payment_type_code,\n\
-               base_dic.dic_name                        as payment_type_name,\n\
-               date_format(callback_time, 'yyyy-MM-dd') as date_id,\n\
-               refund_payment.callback_time,\n\
-               refund_info.refund_num,\n\
-               refund_payment.total_amount\n\
-        from\n\
-        (\n\
-            select data.id,\n\
-                   data.order_id,\n\
-                   data.sku_id,\n\
-                   data.payment_type,\n\
-                   data.callback_time,\n\
-                   data.total_amount\n\
-            from {data_base}.ods_refund_payment_inc\n\
-            where   dt                 = '{start_date}'\n\
-                and type               = 'update'\n\
-                and data.refund_status = '1602'\n\
-                and array_contains(map_keys(old), 'refund_status')\n\
-        ) as refund_payment left join\n\
-        (\n\
-            select data.id,\n\
-                   data.user_id,\n\
-                   data.province_id\n\
-            from {data_base}.ods_order_info_inc\n\
-            where   dt                = '{start_date}'\n\
-                and type              = 'update'\n\
-                and data.order_status = '1006'\n\
-                and array_contains(map_keys(old), 'order_status')\n\
-        ) as order_info\n\
-            on refund_payment.order_id = order_info.id\n\
-        left join\n\
-        (\n\
-            select data.order_id,\n\
-                   data.sku_id,\n\
-                   data.refund_num\n\
-            from {data_base}.ods_order_refund_info_inc\n\
-            where   dt                 = '{start_date}'\n\
-                and type               = 'update'\n\
-                and data.refund_status = '0705'\n\
-                and array_contains(map_keys(old), 'refund_status')\n\
-        ) as refund_info\n\
-            on      refund_payment.order_id = refund_info.order_id\n\
-                and refund_payment.sku_id   = refund_info.sku_id\n\
-        left join\n\
-        (\n\
-            select dic_code,\n\
-                   dic_name\n\
-            from {data_base}.ods_base_dic_full\n\
-            where dt = '{start_date}' and parent_code = '11'\n\
-        ) as base_dic on refund_payment.payment_type = base_dic.dic_code;"
+    dwd_trade_refund_pay_suc_inc = f"""
+        insert overwrite table {data_base}.dwd_trade_refund_pay_suc_inc partition (dt = '{start_date}')
+        select refund_payment.id,
+               order_info.user_id,
+               refund_payment.order_id,
+               refund_payment.sku_id,
+               order_info.province_id,
+               refund_payment.payment_type              as payment_type_code,
+               base_dic.dic_name                        as payment_type_name,
+               date_format(callback_time, 'yyyy-MM-dd') as date_id,
+               refund_payment.callback_time,
+               refund_info.refund_num,
+               refund_payment.total_amount
+        from
+        (
+            select data.id,
+                   data.order_id,
+                   data.sku_id,
+                   data.payment_type,
+                   data.callback_time,
+                   data.total_amount
+            from {data_base}.ods_refund_payment_inc
+            where   dt                 = '{start_date}'
+                and type               = 'update'
+                and data.refund_status = '1602'
+                and array_contains(map_keys(old), 'refund_status')
+        ) as refund_payment left join
+        (
+            select data.id,
+                   data.user_id,
+                   data.province_id
+            from {data_base}.ods_order_info_inc
+            where   dt                = '{start_date}'
+                and type              = 'update'
+                and data.order_status = '1006'
+                and array_contains(map_keys(old), 'order_status')
+        ) as order_info
+            on refund_payment.order_id = order_info.id
+        left join
+        (
+            select data.order_id,
+                   data.sku_id,
+                   data.refund_num
+            from {data_base}.ods_order_refund_info_inc
+            where   dt                 = '{start_date}'
+                and type               = 'update'
+                and data.refund_status = '0705'
+                and array_contains(map_keys(old), 'refund_status')
+        ) as refund_info
+            on      refund_payment.order_id = refund_info.order_id
+                and refund_payment.sku_id   = refund_info.sku_id
+        left join
+        (
+            select dic_code,
+                   dic_name
+            from {data_base}.ods_base_dic_full
+            where dt = '{start_date}' and parent_code = '11'
+        ) as base_dic on refund_payment.payment_type = base_dic.dic_code;"""
 
-    dwd_trade_cart_full = f"\n\
-        insert overwrite table {data_base}.dwd_trade_cart_full partition (dt = '{start_date}')\n\
-        select id,\n\
-               user_id,\n\
-               sku_id,\n\
-               sku_name,\n\
-               sku_num\n\
-        from {data_base}.ods_cart_info_full\n\
-        where dt = '{start_date}' and is_ordered = '0';"
+    dwd_trade_cart_full = f"""
+        insert overwrite table {data_base}.dwd_trade_cart_full partition (dt = '{start_date}')
+        select id,
+               user_id,
+               sku_id,
+               sku_name,
+               sku_num
+        from {data_base}.ods_cart_info_full
+        where dt = '{start_date}' and is_ordered = '0';"""
 
-    dwd_tool_coupon_get_inc = f"\n\
-        insert overwrite table {data_base}.dwd_tool_coupon_get_inc partition (dt = '{start_date}')\n\
-        select data.id,\n\
-               data.coupon_id,\n\
-               data.user_id,\n\
-               date_format(data.get_time, 'yyyy-MM-dd') as date_id,\n\
-               data.get_time\n\
-        from {data_base}.ods_coupon_use_inc\n\
-        where dt = '{start_date}' and type = 'insert';"
+    dwd_tool_coupon_get_inc = f"""
+        insert overwrite table {data_base}.dwd_tool_coupon_get_inc partition (dt = '{start_date}')
+        select data.id,
+               data.coupon_id,
+               data.user_id,
+               date_format(data.get_time, 'yyyy-MM-dd') as date_id,
+               data.get_time
+        from {data_base}.ods_coupon_use_inc
+        where dt = '{start_date}' and type = 'insert';"""
 
-    dwd_tool_coupon_order_inc = f"\n\
-        insert overwrite table {data_base}.dwd_tool_coupon_order_inc partition (dt = '{start_date}')\n\
-        select data.id,\n\
-               data.coupon_id,\n\
-               data.user_id,\n\
-               data.order_id,\n\
-               date_format(data.using_time, 'yyyy-MM-dd') as date_id,\n\
-               data.using_time                            as order_time\n\
-        from {data_base}.ods_coupon_use_inc\n\
-        where dt = '{start_date}' and type = 'update' and array_contains(map_keys(old), 'using_time');"
+    dwd_tool_coupon_order_inc = f"""
+        insert overwrite table {data_base}.dwd_tool_coupon_order_inc partition (dt = '{start_date}')
+        select data.id,
+               data.coupon_id,
+               data.user_id,
+               data.order_id,
+               date_format(data.using_time, 'yyyy-MM-dd') as date_id,
+               data.using_time                            as order_time
+        from {data_base}.ods_coupon_use_inc
+        where dt = '{start_date}' and type = 'update' and array_contains(map_keys(old), 'using_time');"""
 
-    dwd_tool_coupon_pay_inc = f"\n\
-        insert overwrite table {data_base}.dwd_tool_coupon_pay_inc partition (dt = '{start_date}')\n\
-        select data.id,\n\
-               data.coupon_id,\n\
-               data.user_id,\n\
-               data.order_id,\n\
-               date_format(data.used_time, 'yyyy-MM-dd') as date_id,\n\
-               data.used_time                            as payment_time\n\
-        from {data_base}.ods_coupon_use_inc\n\
-        where dt = '{start_date}' and type = 'update' and array_contains(map_keys(old), 'used_time');"
+    dwd_tool_coupon_pay_inc = f"""
+        insert overwrite table {data_base}.dwd_tool_coupon_pay_inc partition (dt = '{start_date}')
+        select data.id,
+               data.coupon_id,
+               data.user_id,
+               data.order_id,
+               date_format(data.used_time, 'yyyy-MM-dd') as date_id,
+               data.used_time                            as payment_time
+        from {data_base}.ods_coupon_use_inc
+        where dt = '{start_date}' and type = 'update' and array_contains(map_keys(old), 'used_time');"""
 
-    dwd_interaction_favor_add_inc = f"\n\
-        insert overwrite table {data_base}.dwd_interaction_favor_add_inc partition (dt = '{start_date}')\n\
-        select data.id,\n\
-               data.user_id,\n\
-               data.sku_id,\n\
-               date_format(data.create_time, 'yyyy-MM-dd') as date_id,\n\
-               data.create_time\n\
-        from {data_base}.ods_favor_info_inc\n\
-        where dt = '{start_date}' and type = 'insert';"
+    dwd_interaction_favor_add_inc = f"""
+        insert overwrite table {data_base}.dwd_interaction_favor_add_inc partition (dt = '{start_date}')
+        select data.id,
+               data.user_id,
+               data.sku_id,
+               date_format(data.create_time, 'yyyy-MM-dd') as date_id,
+               data.create_time
+        from {data_base}.ods_favor_info_inc
+        where dt = '{start_date}' and type = 'insert';"""
 
-    dwd_interaction_comment_inc = f"\n\
-        insert overwrite table {data_base}.dwd_interaction_comment_inc partition (dt = '{start_date}')\n\
-        select comment_info.id,\n\
-               comment_info.user_id,\n\
-               comment_info.sku_id,\n\
-               comment_info.order_id,\n\
-               date_format(comment_info.create_time, 'yyyy-MM-dd') as date_id,\n\
-               comment_info.create_time,\n\
-               comment_info.appraise                               as appraise_code,\n\
-               base_dic.dic_name                                   as appraise_name\n\
-        from\n\
-        (\n\
-            select data.id,\n\
-                   data.user_id,\n\
-                   data.sku_id,\n\
-                   data.order_id,\n\
-                   data.create_time,\n\
-                   data.appraise\n\
-            from {data_base}.ods_comment_info_inc\n\
-            where dt = '{start_date}' and type = 'insert'\n\
-        ) as comment_info left join\n\
-        (\n\
-            select dic_code,\n\
-                   dic_name\n\
-            from {data_base}.ods_base_dic_full\n\
-            where dt = '{start_date}' and parent_code = '12'\n\
-        ) as base_dic on comment_info.appraise = base_dic.dic_code;"
+    dwd_interaction_comment_inc = f"""
+        insert overwrite table {data_base}.dwd_interaction_comment_inc partition (dt = '{start_date}')
+        select comment_info.id,
+               comment_info.user_id,
+               comment_info.sku_id,
+               comment_info.order_id,
+               date_format(comment_info.create_time, 'yyyy-MM-dd') as date_id,
+               comment_info.create_time,
+               comment_info.appraise                               as appraise_code,
+               base_dic.dic_name                                   as appraise_name
+        from
+        (
+            select data.id,
+                   data.user_id,
+                   data.sku_id,
+                   data.order_id,
+                   data.create_time,
+                   data.appraise
+            from {data_base}.ods_comment_info_inc
+            where dt = '{start_date}' and type = 'insert'
+        ) as comment_info left join
+        (
+            select dic_code,
+                   dic_name
+            from {data_base}.ods_base_dic_full
+            where dt = '{start_date}' and parent_code = '12'
+        ) as base_dic on comment_info.appraise = base_dic.dic_code;"""
 
-    dwd_traffic_page_view_inc = f"\n\
-        set hive.cbo.enable=false;\n\
-        insert overwrite table {data_base}.dwd_traffic_page_view_inc partition (dt = '{start_date}')\n\
-        select base_province.province_id,\n\
-               log.brand,\n\
-               log.channel,\n\
-               log.is_new,\n\
-               log.model,\n\
-               log.mid_id,\n\
-               log.operate_system,\n\
-               log.user_id,\n\
-               log.version_code,\n\
-               log.page_item,\n\
-               log.page_item_type,\n\
-               log.last_page_id,\n\
-               log.page_id,\n\
-               log.source_type,\n\
-               date_format(from_utc_timestamp(to_timestamp(log.ts), 'GMT+8'), 'yyyy-MM-dd')                                                    as date_id,\n\
-               date_format(from_utc_timestamp(to_timestamp(log.ts), 'GMT+8'), 'yyyy-MM-dd HH:mm:ss')                                           as view_time,\n\
-               concat(log.mid_id, '-', last_value(log.session_start_point, true) over (partition by log.mid_id order by log.ts)) as session_id,\n\
-               CAST(during_time AS BIGINT) AS during_time\n\
-        from\n\
-        (\n\
-            select common.ar                               as area_code,\n\
-                   common.ba                               as brand,\n\
-                   common.ch                               as channel,\n\
-                   common.is_new                           as is_new,\n\
-                   common.md                               as model,\n\
-                   common.mid                              as mid_id,\n\
-                   common.os                               as operate_system,\n\
-                   common.uid                              as user_id,\n\
-                   common.vc                               as version_code,\n\
-                   page.during_time,\n\
-                   page.item                               as page_item,\n\
-                   page.item_type                          as page_item_type,\n\
-                   page.last_page_id,\n\
-                   page.page_id,\n\
-                   page.source_type,\n\
-                   ts,\n\
-                   if(page.last_page_id is null, ts, null) as session_start_point\n\
-            from {data_base}.ods_log_inc\n\
-            where dt = '{start_date}' and page is not null\n\
-        ) as log left join\n\
-        (\n\
-            select id        as province_id,\n\
-                   area_code\n\
-            from {data_base}.ods_base_province_full\n\
-            where dt = '{start_date}'\n\
-        ) as base_province on log.area_code = base_province.area_code;\n\
-        set hive.cbo.enable=true;"
+    dwd_traffic_page_view_inc = f"""
+        set hive.cbo.enable=false;
+        insert overwrite table {data_base}.dwd_traffic_page_view_inc partition (dt = '{start_date}')
+        select base_province.province_id,
+               log.brand,
+               log.channel,
+               log.is_new,
+               log.model,
+               log.mid_id,
+               log.operate_system,
+               log.user_id,
+               log.version_code,
+               log.page_item,
+               log.page_item_type,
+               log.last_page_id,
+               log.page_id,
+               log.source_type,
+               date_format(from_utc_timestamp(to_timestamp(log.ts), 'GMT+8'), 'yyyy-MM-dd')                                                    as date_id,
+               date_format(from_utc_timestamp(to_timestamp(log.ts), 'GMT+8'), 'yyyy-MM-dd HH:mm:ss')                                           as view_time,
+               concat(log.mid_id, '-', last_value(log.session_start_point, true) over (partition by log.mid_id order by log.ts)) as session_id,
+               CAST(during_time AS BIGINT) AS during_time
+        from
+        (
+            select common.ar                               as area_code,
+                   common.ba                               as brand,
+                   common.ch                               as channel,
+                   common.is_new                           as is_new,
+                   common.md                               as model,
+                   common.mid                              as mid_id,
+                   common.os                               as operate_system,
+                   common.uid                              as user_id,
+                   common.vc                               as version_code,
+                   page.during_time,
+                   page.item                               as page_item,
+                   page.item_type                          as page_item_type,
+                   page.last_page_id,
+                   page.page_id,
+                   page.source_type,
+                   ts,
+                   if(page.last_page_id is null, ts, null) as session_start_point
+            from {data_base}.ods_log_inc
+            where dt = '{start_date}' and page is not null
+        ) as log left join
+        (
+            select id        as province_id,
+                   area_code
+            from {data_base}.ods_base_province_full
+            where dt = '{start_date}'
+        ) as base_province on log.area_code = base_province.area_code;
+        set hive.cbo.enable=true;"""
 
-    dwd_traffic_start_inc = f"\n\
-        set hive.cbo.enable=false;\n\
-        insert overwrite table {data_base}.dwd_traffic_start_inc partition (dt = '{start_date}')\n\
-        select base_province.province_id,\n\
-               log.brand,\n\
-               log.channel,\n\
-               log.is_new,\n\
-               log.model,\n\
-               log.mid_id,\n\
-               log.operate_system,\n\
-               log.user_id,\n\
-               log.version_code,\n\
-               log.entry,\n\
-               log.open_ad_id,\n\
-               date_format(from_utc_timestamp(to_timestamp(log.ts), 'GMT+8'), 'yyyy-MM-dd')          as date_id,\n\
-               date_format(from_utc_timestamp(to_timestamp(log.ts), 'GMT+8'), 'yyyy-MM-dd HH:mm:ss') as start_time,\n\
-               log.loading_time                                                        as loading_time_ms,\n\
-               log.open_ad_ms,\n\
-               log.open_ad_skip_ms\n\
-        from\n\
-        (\n\
-            select common.ar               as area_code,\n\
-                   common.ba               as brand,\n\
-                   common.ch               as channel,\n\
-                   common.is_new,\n\
-                   common.md               as model,\n\
-                   common.mid              as mid_id,\n\
-                   common.os               as operate_system,\n\
-                   common.uid              as user_id,\n\
-                   common.vc               as version_code,\n\
-                   `start`.entry,\n\
-                   `start`.loading_time,\n\
-                   `start`.open_ad_id,\n\
-                   `start`.open_ad_ms,\n\
-                   `start`.open_ad_skip_ms,\n\
-                   ts\n\
-            from {data_base}.ods_log_inc\n\
-            where dt = '{start_date}' and `start` is not null\n\
-        ) as log left join\n\
-        (\n\
-            select id province_id,\n\
-                   area_code\n\
-            from {data_base}.ods_base_province_full\n\
-            where dt = '{start_date}'\n\
-        ) as base_province on log.area_code = base_province.area_code;\n\
-        set hive.cbo.enable=true;"
+    dwd_traffic_start_inc = f"""
+        set hive.cbo.enable=false;
+        insert overwrite table {data_base}.dwd_traffic_start_inc partition (dt = '{start_date}')
+        select base_province.province_id,
+               log.brand,
+               log.channel,
+               log.is_new,
+               log.model,
+               log.mid_id,
+               log.operate_system,
+               log.user_id,
+               log.version_code,
+               log.entry,
+               log.open_ad_id,
+               date_format(from_utc_timestamp(to_timestamp(log.ts), 'GMT+8'), 'yyyy-MM-dd')          as date_id,
+               date_format(from_utc_timestamp(to_timestamp(log.ts), 'GMT+8'), 'yyyy-MM-dd HH:mm:ss') as start_time,
+               log.loading_time                                                        as loading_time_ms,
+               log.open_ad_ms,
+               log.open_ad_skip_ms
+        from
+        (
+            select common.ar               as area_code,
+                   common.ba               as brand,
+                   common.ch               as channel,
+                   common.is_new,
+                   common.md               as model,
+                   common.mid              as mid_id,
+                   common.os               as operate_system,
+                   common.uid              as user_id,
+                   common.vc               as version_code,
+                   `start`.entry,
+                   `start`.loading_time,
+                   `start`.open_ad_id,
+                   `start`.open_ad_ms,
+                   `start`.open_ad_skip_ms,
+                   ts
+            from {data_base}.ods_log_inc
+            where dt = '{start_date}' and `start` is not null
+        ) as log left join
+        (
+            select id province_id,
+                   area_code
+            from {data_base}.ods_base_province_full
+            where dt = '{start_date}'
+        ) as base_province on log.area_code = base_province.area_code;
+        set hive.cbo.enable=true;"""
 
-    dwd_traffic_action_inc = f"\n\
-        set hive.cbo.enable=false;\n\
-        insert overwrite table {data_base}.dwd_traffic_action_inc partition (dt = '{start_date}')\n\
-        select base_province.province_id,\n\
-               log.brand,\n\
-               log.channel,\n\
-               log.is_new,\n\
-               log.model,\n\
-               log.mid_id,\n\
-               log.operate_system,\n\
-               log.user_id,\n\
-               log.version_code,\n\
-               log.during_time,\n\
-               log.page_item,\n\
-               log.page_item_type,\n\
-               log.last_page_id,\n\
-               log.page_id,\n\
-               log.source_type,\n\
-               log.action_id,\n\
-               log.action_item,\n\
-               log.action_item_type,\n\
-               date_format(from_utc_timestamp(to_timestamp(log.ts), 'GMT+8'), 'yyyy-MM-dd')          as date_id,\n\
-               date_format(from_utc_timestamp(to_timestamp(log.ts), 'GMT+8'), 'yyyy-MM-dd HH:mm:ss') as action_time\n\
-        from\n\
-        (\n\
-            select common.ar          as area_code,\n\
-                   common.ba          as brand,\n\
-                   common.ch          as channel,\n\
-                   common.is_new,\n\
-                   common.md          as model,\n\
-                   common.mid         as mid_id,\n\
-                   common.os          as operate_system,\n\
-                   common.uid         as user_id,\n\
-                   common.vc          as version_code,\n\
-                   CAST(page.during_time AS BIGINT) AS during_time,\n\
-                   page.item          as page_item,\n\
-                   page.item_type     as page_item_type,\n\
-                   page.last_page_id,\n\
-                   page.page_id,\n\
-                   page.source_type,\n\
-                   action.action_id,\n\
-                   action.item        as action_item,\n\
-                   action.item_type   as action_item_type,\n\
-                   action.ts\n\
-            from {data_base}.ods_log_inc lateral view explode(actions) tmp as action\n\
-            where dt = '{start_date}' and actions is not null\n\
-        ) as log left join\n\
-        (\n\
-            select id province_id,\n\
-                   area_code\n\
-            from {data_base}.ods_base_province_full\n\
-            where dt = '{start_date}'\n\
-        ) base_province on log.area_code = base_province.area_code;\n\
-        set hive.cbo.enable=true;"
+    dwd_traffic_action_inc = f"""
+        set hive.cbo.enable=false;
+        insert overwrite table {data_base}.dwd_traffic_action_inc partition (dt = '{start_date}')
+        select base_province.province_id,
+               log.brand,
+               log.channel,
+               log.is_new,
+               log.model,
+               log.mid_id,
+               log.operate_system,
+               log.user_id,
+               log.version_code,
+               log.during_time,
+               log.page_item,
+               log.page_item_type,
+               log.last_page_id,
+               log.page_id,
+               log.source_type,
+               log.action_id,
+               log.action_item,
+               log.action_item_type,
+               date_format(from_utc_timestamp(to_timestamp(log.ts), 'GMT+8'), 'yyyy-MM-dd')          as date_id,
+               date_format(from_utc_timestamp(to_timestamp(log.ts), 'GMT+8'), 'yyyy-MM-dd HH:mm:ss') as action_time
+        from
+        (
+            select common.ar          as area_code,
+                   common.ba          as brand,
+                   common.ch          as channel,
+                   common.is_new,
+                   common.md          as model,
+                   common.mid         as mid_id,
+                   common.os          as operate_system,
+                   common.uid         as user_id,
+                   common.vc          as version_code,
+                   CAST(page.during_time AS BIGINT) AS during_time,
+                   page.item          as page_item,
+                   page.item_type     as page_item_type,
+                   page.last_page_id,
+                   page.page_id,
+                   page.source_type,
+                   action.action_id,
+                   action.item        as action_item,
+                   action.item_type   as action_item_type,
+                   action.ts
+            from {data_base}.ods_log_inc lateral view explode(actions) tmp as action
+            where dt = '{start_date}' and actions is not null
+        ) as log left join
+        (
+            select id province_id,
+                   area_code
+            from {data_base}.ods_base_province_full
+            where dt = '{start_date}'
+        ) base_province on log.area_code = base_province.area_code;
+        set hive.cbo.enable=true;"""
 
-    dwd_traffic_display_inc = f"\n\
-        set hive.cbo.enable=false;\n\
-        insert overwrite table {data_base}.dwd_traffic_display_inc partition (dt = '{start_date}')\n\
-        select base_province.province_id,\n\
-               log.brand,\n\
-               log.channel,\n\
-               log.is_new,\n\
-               log.model,\n\
-               log.mid_id,\n\
-               log.operate_system,\n\
-               log.user_id,\n\
-               log.version_code,\n\
-               log.during_time,\n\
-               log.page_item,\n\
-               log.page_item_type,\n\
-               log.last_page_id,\n\
-               log.page_id,\n\
-               log.source_type,\n\
-               date_format(from_utc_timestamp(to_timestamp(log.ts), 'GMT+8'), 'yyyy-MM-dd')          as date_id,\n\
-               date_format(from_utc_timestamp(to_timestamp(log.ts), 'GMT+8'), 'yyyy-MM-dd HH:mm:ss') as display_time,\n\
-               log.display_type,\n\
-               log.display_item,\n\
-               log.display_item_type,\n\
-               log.display_order,\n\
-               log.display_pos_id\n\
-        from\n\
-        (\n\
-            select common.ar             as area_code,\n\
-                   common.ba             as brand,\n\
-                   common.ch             as channel,\n\
-                   common.is_new,\n\
-                   common.md             as model,\n\
-                   common.mid            as mid_id,\n\
-                   common.os             as operate_system,\n\
-                   common.uid            as user_id,\n\
-                   common.vc             as version_code,\n\
-                   CAST(page.during_time AS BIGINT) AS during_time,\n\
-                   page.item             as page_item,\n\
-                   page.item_type        as page_item_type,\n\
-                   page.last_page_id,\n\
-                   page.page_id,\n\
-                   page.source_type,\n\
-                   display.display_type,\n\
-                   display.item          as display_item,\n\
-                   display.item_type     as display_item_type,\n\
-                   CAST(display.`order` AS BIGINT)       as display_order,\n\
-                   CAST(display.pos_id AS BIGINT)        as display_pos_id,\n\
-                   ts\n\
-            from {data_base}.ods_log_inc lateral view explode(displays) tmp as display\n\
-            where dt = '{start_date}' and displays is not null\n\
-        ) as log left join\n\
-        (\n\
-            select id province_id,\n\
-                   area_code\n\
-            from {data_base}.ods_base_province_full\n\
-            where dt = '{start_date}'\n\
-        ) as base_province on log.area_code = base_province.area_code;\n\
-        set hive.cbo.enable=true;"
+    dwd_traffic_display_inc = f"""
+        set hive.cbo.enable=false;
+        insert overwrite table {data_base}.dwd_traffic_display_inc partition (dt = '{start_date}')
+        select base_province.province_id,
+               log.brand,
+               log.channel,
+               log.is_new,
+               log.model,
+               log.mid_id,
+               log.operate_system,
+               log.user_id,
+               log.version_code,
+               log.during_time,
+               log.page_item,
+               log.page_item_type,
+               log.last_page_id,
+               log.page_id,
+               log.source_type,
+               date_format(from_utc_timestamp(to_timestamp(log.ts), 'GMT+8'), 'yyyy-MM-dd')          as date_id,
+               date_format(from_utc_timestamp(to_timestamp(log.ts), 'GMT+8'), 'yyyy-MM-dd HH:mm:ss') as display_time,
+               log.display_type,
+               log.display_item,
+               log.display_item_type,
+               log.display_order,
+               log.display_pos_id
+        from
+        (
+            select common.ar             as area_code,
+                   common.ba             as brand,
+                   common.ch             as channel,
+                   common.is_new,
+                   common.md             as model,
+                   common.mid            as mid_id,
+                   common.os             as operate_system,
+                   common.uid            as user_id,
+                   common.vc             as version_code,
+                   CAST(page.during_time AS BIGINT) AS during_time,
+                   page.item             as page_item,
+                   page.item_type        as page_item_type,
+                   page.last_page_id,
+                   page.page_id,
+                   page.source_type,
+                   display.display_type,
+                   display.item          as display_item,
+                   display.item_type     as display_item_type,
+                   CAST(display.`order` AS BIGINT)       as display_order,
+                   CAST(display.pos_id AS BIGINT)        as display_pos_id,
+                   ts
+            from {data_base}.ods_log_inc lateral view explode(displays) tmp as display
+            where dt = '{start_date}' and displays is not null
+        ) as log left join
+        (
+            select id province_id,
+                   area_code
+            from {data_base}.ods_base_province_full
+            where dt = '{start_date}'
+        ) as base_province on log.area_code = base_province.area_code;
+        set hive.cbo.enable=true;"""
 
-    dwd_traffic_error_inc = f"\n\
-        set hive.cbo.enable=false;\n\
-        set hive.execution.engine=mr;\n\
-        insert overwrite table {data_base}.dwd_traffic_error_inc partition (dt = '{start_date}')\n\
-        select base_province.province_id,\n\
-               log.brand,\n\
-               log.channel,\n\
-               log.is_new,\n\
-               log.model,\n\
-               log.mid_id,\n\
-               log.operate_system,\n\
-               log.user_id,\n\
-               log.version_code,\n\
-               log.page_item,\n\
-               log.page_item_type,\n\
-               log.last_page_id,\n\
-               log.page_id,\n\
-               log.source_type,\n\
-               log.entry,\n\
-               log.loading_time,\n\
-               log.open_ad_id,\n\
-               log.open_ad_ms,\n\
-               log.open_ad_skip_ms,\n\
-               log.actions,\n\
-               log.displays,\n\
-               date_format(from_utc_timestamp(to_timestamp(log.ts), 'GMT+8'), 'yyyy-MM-dd')          as date_id,\n\
-               date_format(from_utc_timestamp(to_timestamp(log.ts), 'GMT+8'), 'yyyy-MM-dd HH:mm:ss') as error_time,\n\
-               log.error_code,\n\
-               log.error_msg\n\
-        from\n\
-        (\n\
-            select common.ar             as area_code,\n\
-                   common.ba             as brand,\n\
-                   common.ch             as channel,\n\
-                   common.is_new,\n\
-                   common.md             as model,\n\
-                   common.mid            as mid_id,\n\
-                   common.os             as operate_system,\n\
-                   common.uid            as user_id,\n\
-                   common.vc             as version_code,\n\
-                   page.during_time,\n\
-                   page.item             as page_item,\n\
-                   page.item_type        as page_item_type,\n\
-                   page.last_page_id,\n\
-                   page.page_id,\n\
-                   page.source_type,\n\
-                   `start`.entry,\n\
-                   `start`.loading_time,\n\
-                   `start`.open_ad_id,\n\
-                   `start`.open_ad_ms,\n\
-                   `start`.open_ad_skip_ms,\n\
-                   actions,\n\
-                   displays,\n\
-                   err.error_code,\n\
-                   err.msg               as error_msg,\n\
-                   ts\n\
-            from {data_base}.ods_log_inc\n\
-            where dt = '{start_date}' and err is not null\n\
-        ) as log left join\n\
-        (\n\
-            select id province_id,\n\
-                   area_code\n\
-            from {data_base}.ods_base_province_full\n\
-            where dt = '{start_date}'\n\
-        ) as base_province on log.area_code = base_province.area_code;\n\
-        set hive.execution.engine=spark;\n\
-        set hive.cbo.enable=true;"
+    dwd_traffic_error_inc = f"""
+        set hive.cbo.enable=false;
+        set hive.execution.engine=mr;
+        insert overwrite table {data_base}.dwd_traffic_error_inc partition (dt = '{start_date}')
+        select base_province.province_id,
+               log.brand,
+               log.channel,
+               log.is_new,
+               log.model,
+               log.mid_id,
+               log.operate_system,
+               log.user_id,
+               log.version_code,
+               log.page_item,
+               log.page_item_type,
+               log.last_page_id,
+               log.page_id,
+               log.source_type,
+               log.entry,
+               log.loading_time,
+               log.open_ad_id,
+               log.open_ad_ms,
+               log.open_ad_skip_ms,
+               log.actions,
+               log.displays,
+               date_format(from_utc_timestamp(to_timestamp(log.ts), 'GMT+8'), 'yyyy-MM-dd')          as date_id,
+               date_format(from_utc_timestamp(to_timestamp(log.ts), 'GMT+8'), 'yyyy-MM-dd HH:mm:ss') as error_time,
+               log.error_code,
+               log.error_msg
+        from
+        (
+            select common.ar             as area_code,
+                   common.ba             as brand,
+                   common.ch             as channel,
+                   common.is_new,
+                   common.md             as model,
+                   common.mid            as mid_id,
+                   common.os             as operate_system,
+                   common.uid            as user_id,
+                   common.vc             as version_code,
+                   page.during_time,
+                   page.item             as page_item,
+                   page.item_type        as page_item_type,
+                   page.last_page_id,
+                   page.page_id,
+                   page.source_type,
+                   `start`.entry,
+                   `start`.loading_time,
+                   `start`.open_ad_id,
+                   `start`.open_ad_ms,
+                   `start`.open_ad_skip_ms,
+                   actions,
+                   displays,
+                   err.error_code,
+                   err.msg               as error_msg,
+                   ts
+            from {data_base}.ods_log_inc
+            where dt = '{start_date}' and err is not null
+        ) as log left join
+        (
+            select id province_id,
+                   area_code
+            from {data_base}.ods_base_province_full
+            where dt = '{start_date}'
+        ) as base_province on log.area_code = base_province.area_code;
+        set hive.execution.engine=spark;
+        set hive.cbo.enable=true;"""
 
-    dwd_user_register_inc = f"\n\
-        insert overwrite table {data_base}.dwd_user_register_inc partition (dt = '{start_date}')\n\
-        select user_info.user_id,\n\
-               date_format(user_info.create_time, 'yyyy-MM-dd') as date_id,\n\
-               user_info.create_time,\n\
-               log.channel,\n\
-               base_province.province_id,\n\
-               log.version_code,\n\
-               log.mid_id,\n\
-               log.brand,\n\
-               log.model,\n\
-               log.operate_system\n\
-        from\n\
-        (\n\
-            select data.id user_id,\n\
-                   data.create_time\n\
-            from {data_base}.ods_user_info_inc\n\
-            where dt = '{start_date}' and type = 'insert'\n\
-        ) user_info left join\n\
-        (\n\
-            select common.ar  as area_code,\n\
-                   common.ba  as brand,\n\
-                   common.ch  as channel,\n\
-                   common.md  as model,\n\
-                   common.mid as mid_id,\n\
-                   common.os  as operate_system,\n\
-                   common.uid as user_id,\n\
-                   common.vc  as version_code\n\
-            from {data_base}.ods_log_inc\n\
-            where dt = '{start_date}' and page.page_id = 'register' and common.uid is not null\n\
-        ) as log\n\
-            on user_info.user_id = log.user_id\n\
-        left join\n\
-        (\n\
-            select id province_id,\n\
-                   area_code\n\
-            from {data_base}.ods_base_province_full\n\
-            where dt = '{start_date}'\n\
-        ) base_province on log.area_code = base_province.area_code;"
+    dwd_user_register_inc = f"""
+        insert overwrite table {data_base}.dwd_user_register_inc partition (dt = '{start_date}')
+        select user_info.user_id,
+               date_format(user_info.create_time, 'yyyy-MM-dd') as date_id,
+               user_info.create_time,
+               log.channel,
+               base_province.province_id,
+               log.version_code,
+               log.mid_id,
+               log.brand,
+               log.model,
+               log.operate_system
+        from
+        (
+            select data.id user_id,
+                   data.create_time
+            from {data_base}.ods_user_info_inc
+            where dt = '{start_date}' and type = 'insert'
+        ) user_info left join
+        (
+            select common.ar  as area_code,
+                   common.ba  as brand,
+                   common.ch  as channel,
+                   common.md  as model,
+                   common.mid as mid_id,
+                   common.os  as operate_system,
+                   common.uid as user_id,
+                   common.vc  as version_code
+            from {data_base}.ods_log_inc
+            where dt = '{start_date}' and page.page_id = 'register' and common.uid is not null
+        ) as log
+            on user_info.user_id = log.user_id
+        left join
+        (
+            select id province_id,
+                   area_code
+            from {data_base}.ods_base_province_full
+            where dt = '{start_date}'
+        ) base_province on log.area_code = base_province.area_code;"""
 
-    dwd_user_login_inc = f"\n\
-        insert overwrite table {data_base}.dwd_user_login_inc partition (dt = '{start_date}')\n\
-        select user_id,\n\
-               date_format(from_utc_timestamp(to_timestamp(log.ts), 'GMT+8'), 'yyyy-MM-dd')          as date_id,\n\
-               date_format(from_utc_timestamp(to_timestamp(log.ts), 'GMT+8'), 'yyyy-MM-dd HH:mm:ss') as login_time,\n\
-               log.channel,\n\
-               base_province.province_id,\n\
-               log.version_code,\n\
-               log.mid_id,\n\
-               log.brand,\n\
-               log.model,\n\
-               log.operate_system\n\
-        from\n\
-        (\n\
-            select v.user_id,\n\
-                   v.channel,\n\
-                   v.area_code,\n\
-                   v.version_code,\n\
-                   v.mid_id,\n\
-                   v.brand,\n\
-                   v.model,\n\
-                   v.operate_system,\n\
-                   v.ts\n\
-            from\n\
-            (\n\
-                select u.user_id,\n\
-                       u.channel,\n\
-                       u.area_code,\n\
-                       u.version_code,\n\
-                       u.mid_id,\n\
-                       u.brand,\n\
-                       u.model,\n\
-                       u.operate_system,\n\
-                       u.ts,\n\
-                       row_number() over (partition by u.session_id order by u.ts) as rn\n\
-                from\n\
-                (\n\
-                    select t.user_id,\n\
-                           t.channel,\n\
-                           t.area_code,\n\
-                           t.version_code,\n\
-                           t.mid_id,\n\
-                           t.brand,\n\
-                           t.model,\n\
-                           t.operate_system,\n\
-                           t.ts,\n\
-                           concat(t.mid_id, '-', last_value(t.session_start_point, true) over (partition by t.mid_id order by t.ts)) as session_id\n\
-                    from\n\
-                    (\n\
-                        select common.uid                              as user_id,\n\
-                               common.ch                               as channel,\n\
-                               common.ar                               as area_code,\n\
-                               common.vc                               as version_code,\n\
-                               common.mid                              as mid_id,\n\
-                               common.ba                               as brand,\n\
-                               common.md                               as model,\n\
-                               common.os                               as operate_system,\n\
-                               ts,\n\
-                               if(page.last_page_id is null, ts, null) as session_start_point\n\
-                        from {data_base}.ods_log_inc\n\
-                        where dt = '{start_date}' and page is not null\n\
-                    ) as t\n\
-                ) as u where user_id is not null\n\
-            ) as v where rn = 1\n\
-        ) as log left join\n\
-        (\n\
-            select id province_id,\n\
-                   area_code\n\
-            from {data_base}.ods_base_province_full\n\
-            where dt = '{start_date}'\n\
-        ) as base_province on log.area_code = base_province.area_code;"
+    dwd_user_login_inc = f"""
+        insert overwrite table {data_base}.dwd_user_login_inc partition (dt = '{start_date}')
+        select user_id,
+               date_format(from_utc_timestamp(to_timestamp(log.ts), 'GMT+8'), 'yyyy-MM-dd')          as date_id,
+               date_format(from_utc_timestamp(to_timestamp(log.ts), 'GMT+8'), 'yyyy-MM-dd HH:mm:ss') as login_time,
+               log.channel,
+               base_province.province_id,
+               log.version_code,
+               log.mid_id,
+               log.brand,
+               log.model,
+               log.operate_system
+        from
+        (
+            select v.user_id,
+                   v.channel,
+                   v.area_code,
+                   v.version_code,
+                   v.mid_id,
+                   v.brand,
+                   v.model,
+                   v.operate_system,
+                   v.ts
+            from
+            (
+                select u.user_id,
+                       u.channel,
+                       u.area_code,
+                       u.version_code,
+                       u.mid_id,
+                       u.brand,
+                       u.model,
+                       u.operate_system,
+                       u.ts,
+                       row_number() over (partition by u.session_id order by u.ts) as rn
+                from
+                (
+                    select t.user_id,
+                           t.channel,
+                           t.area_code,
+                           t.version_code,
+                           t.mid_id,
+                           t.brand,
+                           t.model,
+                           t.operate_system,
+                           t.ts,
+                           concat(t.mid_id, '-', last_value(t.session_start_point, true) over (partition by t.mid_id order by t.ts)) as session_id
+                    from
+                    (
+                        select common.uid                              as user_id,
+                               common.ch                               as channel,
+                               common.ar                               as area_code,
+                               common.vc                               as version_code,
+                               common.mid                              as mid_id,
+                               common.ba                               as brand,
+                               common.md                               as model,
+                               common.os                               as operate_system,
+                               ts,
+                               if(page.last_page_id is null, ts, null) as session_start_point
+                        from {data_base}.ods_log_inc
+                        where dt = '{start_date}' and page is not null
+                    ) as t
+                ) as u where user_id is not null
+            ) as v where rn = 1
+        ) as log left join
+        (
+            select id province_id,
+                   area_code
+            from {data_base}.ods_base_province_full
+            where dt = '{start_date}'
+        ) as base_province on log.area_code = base_province.area_code;"""
 
     ods2dwd_sqls = [dwd_trade_cart_add_inc, dwd_trade_order_detail_inc, dwd_trade_cancel_detail_inc,
                     dwd_trade_pay_detail_suc_inc, dwd_trade_order_refund_inc,
