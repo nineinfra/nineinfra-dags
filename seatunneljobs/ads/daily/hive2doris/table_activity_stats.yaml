@@ -1,0 +1,46 @@
+apiVersion: seatunnel.nineinfra.tech/v1
+kind: SeatunnelJob
+metadata:
+  labels:
+    app.kubernetes.io/name: seatunneljob
+    app.kubernetes.io/instance: seatunneljob-sample
+    app.kubernetes.io/part-of: seatunnel-operator
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: seatunnel-operator
+  name: nine-test
+spec:
+  version: "v2.3.4"
+  image:
+    repository: "nineinfra/seatunnel"
+    tag: "v2.3.4"
+    pullPolicy: "IfNotPresent"
+  conf:
+    env:
+      "spark.driver.defaultJavaOptions": "\"--add-exports java.base/sun.nio.ch=ALL-UNNAMED\""
+    source:
+      type: Jdbc
+      conf:
+        "url": "\"jdbc:hive2://100.88.132.226:10009/datahouse\""
+        "driver": "\"org.apache.hive.jdbc.HiveDriver\""
+        "user": "kyuubi"
+        "password": "kyuubi"
+        "connection_check_timeout_sec": "30"
+        "query": "\"select * from datahouse.ads_activity_stats WHERE dt = CURRENT_DATE\""
+    sink:
+      type: Doris
+      conf:
+          "fenodes": "\"10.98.68.222:8030\""
+          "username": "root"
+          "password": "\"\""
+          "database": "datahouse"
+          "table": "ads_activity_stats"
+          "sink.enable-2pc": "true"
+          "sink.label-prefix": "nineinfra"
+          "sink.enable-delete": "true"
+      extraConfig:
+          "format": "json"
+          "read_json_by_line": "true"
+
+
+
+
